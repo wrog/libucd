@@ -186,31 +186,156 @@ sub make_jamo_tables() {
     my $VCount = 21;
     my $TCount = 28;
     my $i;
+    my $fh;
     
     # None of the syllables exceed 4 bytes, so let's not waste
     # pointer space that might have to be relocated...
 
-    print "const char libucd_hangul_jamo_l[$LCount][4] = {\n";
+    open($fh, '>', 'gen/jamo.c') or die "$0 cannot create gen/jamo.c";
+    print $fh "#include \"libucd_int.h\"\n\n";
+
+    print $fh "const char libucd_hangul_jamo_l[$LCount][4] = {\n";
     for ( $i = 0 ; $i < $LCount ; $i++ ) {
-	printf "\t%s,\n", make_jamo_string(${$ucs_props{$LBase+$i}}{'Jamo_Short_Name'});
+	printf $fh "\t%s,\n", make_jamo_string(${$ucs_props{$LBase+$i}}{'Jamo_Short_Name'});
     }
-    print "};\n";
-    print "const char libucd_hangul_jamo_v[$VCount][4] = {\n";
+    print $fh "};\n";
+    print $fh "const char libucd_hangul_jamo_v[$VCount][4] = {\n";
     for ( $i = 0 ; $i < $VCount ; $i++ ) {
-	printf "\t%s,\n", make_jamo_string(${$ucs_props{$VBase+$i}}{'Jamo_Short_Name'});
+	printf $fh "\t%s,\n", make_jamo_string(${$ucs_props{$VBase+$i}}{'Jamo_Short_Name'});
     }
-    print "};\n";
-    print "const char libucd_hangul_jamo_t[$TCount][4] = {\n";
+    print $fh "};\n";
+    print $fh "const char libucd_hangul_jamo_t[$TCount][4] = {\n";
     for ( $i = 0 ; $i < $TCount ; $i++ ) {
-	printf "\t%s,\n", make_jamo_string(${$ucs_props{$TBase+$i}}{'Jamo_Short_Name'});
+	printf $fh "\t%s,\n", make_jamo_string(${$ucs_props{$TBase+$i}}{'Jamo_Short_Name'});
     }
-    print "};\n";
+    print $fh "};\n";
+
+    close($fh);
+}
+
+# This produces a names list, and stores for each character which index in
+# the names list they correspond to.  We use a long names list with indexes
+# instead of pointers to avoid fixups, and to conserve space on 64-bit
+# architectures.  Sort it in order by keyspace to improve cache locality.
+%name_to_index = ();
+%name_to_ucs   = ();
+
+sub make_names_list() {
+    my $k;
+    my $pos = 0;
+    my $fh;
+    my $col;
+
+    open($fh, '>', 'gen/nameslist.c') or die "$0: Cannot create gen/nameslist.c";
+
+    print $fh "#include \"libucd_int.h\"\n\n";
+    print $fh "const char libucd_names_list[] = {";
+    $col = 9999;
+
+    foreach $k ( sort {$a <=> $b} (keys(%ucs_props)) ) {
+	print STDERR "Not a number: \"$k\"\n" if ( $k ne ($k+0) );
+
+	my $n = ${$ucs_props{$k}}{'Name'};
+	if ( defined($n) ) {
+	    if ( defined($name_to_ucs{$n}) ) {
+		printf STDERR "WARNING: Name \"%s\" duplicated from U+%04X to U+%04X\n",
+		$n, $k, $name_to_ucs{$n};
+	    } else {
+		$name_to_ucs{$n} = $k;
+		$name_to_index{$n} = $pos;
+		$pos += length($n) + 1;
+		my $i;
+		for ( $i = 0 ; $i <= length($n) ; $i++ ) {
+		    my $c = substr($n,$i,1);
+		    
+		    if ( $col >= 72 ) {
+			print $fh "\n\t";
+			$col = 8;
+		    }
+		    print $fh ( $c ne '' ) ? " \'$c\'," : "   0,";
+		    $col += 5;
+		}
+	    }
+	}
+    }
+    print $fh "\n};\n";
+    close($fh);
+}
+
+#
+# Produce gperf output for names-to-UCS lookup
+# Note that Hangul syllabics are added to the gperf list but not
+# to the names list; we can verify the Hangul against the systematic
+# name generator.  However, for CJK it's easier to just do a pattern
+# match from the beginning.
+#
+sub make_name_gperf()
+{
+    my $fh;
+    my $k;
+
+    open($fh, '>', 'gen/nametoucs.gperf')
+	or die "$0: cannot write gen/nametoucs.gperf\n";
+
+    foreach $k ( keys(%name_to_ucs) ) {
+	printf $fh "%s,%u\n", $k, $name_to_ucs{$k};
+    }
+    close($fh);
+}
+
+#
+# Produce a list of character properties, sans names; this is
+# a test in order to figure out how much we could save from a
+# range-oriented table for everything except names.
+#
+sub dump_prop_list()
+{
+    my $fh, $c;
+
+    open($fh, '>', 'gen/propdump.txt')
+	or die "$0: cannot write gen/propdump.txt\n";
+    binmode $fh, ':utf8';
+    
+    for ( $c = 0 ; $c <= 0x10ffff ; $c++ ) {
+	my %h = %{$ucs_props{$c}};
+
+	# Handle these separately
+	delete $h{'Name'};
+	delete $h{'Unicode_1_Name'};
+	delete $h{'ISO_Comment'};
+	delete $h{'Decomposition_Mapping'};
+	# delete $h{'Uppercase_Mapping'};
+	# delete $h{'Lowercase_Mapping'};
+	# delete $h{'Titlecase_Mapping'};
+	# delete $h{'Special_Case_Condition'};
+	delete $h{'Jamo_Short_Name'};
+
+	# Store these as offsets.
+	my $k;
+	foreach $k ( 'Simple_Uppercase_Mapping',
+		     'Simple_Lowercase_Mapping',
+		     'Simple_Titlecase_Mapping' ) {
+	    if ( defined($h{$k}) ) {
+		$h{$k} -= $c;	# Convert to offset
+	    } else {
+		$h{$k} = 0;	# Default is zero offset
+	    }
+	}
+    
+	my @l = sort(keys(%h));
+	my $p;
+	printf $fh "%05X ", $c;
+	foreach $p ( @l ) {
+	    print $fh $p,':',$h{$p},';';
+	}
+	print $fh "\n";
+    }
 }
 
 #
 # Import files
 #
-read_separated_file('UnicodeData.txt',
+read_separated_file('ucd/UnicodeData.txt',
 		    ['!Name', 'eGeneral_Category', 'nCanonical_Combining_Class',
 		     'eBidi_Class', '!Decomposition', undef, undef,
 		     'eNumeric_Value', 'bBidi_Mirrored',
@@ -219,29 +344,29 @@ read_separated_file('UnicodeData.txt',
 		    ['<reserved>', 'Cn', 0, undef, undef, undef, undef, undef,
 		     'N', undef, undef, '=', '=', '=']);
 
-read_separated_file('extracted/DerivedNumericType.txt', ['eNumeric_Type'], []);
-read_separated_file('extracted/DerivedNumericValues.txt', ['eNumeric_Value'], []);
-read_separated_file('extracted/DerivedBidiClass.txt', ['eBidi_Class'], ['L']);
-read_separated_file('ArabicShaping.txt', [undef, 'eJoining_Type', 'eJoining_Group'], []);
-read_separated_file('BidiMirroring.txt', ['pBidi_Mirroring_Glyph'], []);
-read_separated_file('Blocks.txt', ['cBlock'], []);
-read_separated_file('CompositionExclusions.txt', 'bComposition_Exclusion', []);
-read_separated_file('CaseFolding.txt', ['eCase_Folding_Type', 'sCase_Folding'], []);
-read_separated_file('DerivedAge.txt', ['cAge'], []);
-read_separated_file('EastAsianWidth.txt', ['eEast_Asian_Width'], []);
-read_separated_file('HangulSyllableType.txt', ['eHangul_Syllable_Type'], []);
-read_separated_file('LineBreak.txt', ['eLine_Break'], []);
-read_separated_file('Scripts.txt', ['cScript'], ['Common']);
-read_separated_file('SpecialCasing.txt', ['sUppercase_Mapping', 'sLowercase_Mapping',
+read_separated_file('ucd/extracted/DerivedNumericType.txt', ['eNumeric_Type'], []);
+read_separated_file('ucd/extracted/DerivedNumericValues.txt', ['eNumeric_Value'], []);
+read_separated_file('ucd/extracted/DerivedBidiClass.txt', ['eBidi_Class'], ['L']);
+read_separated_file('ucd/ArabicShaping.txt', [undef, 'eJoining_Type', 'eJoining_Group'], []);
+read_separated_file('ucd/BidiMirroring.txt', ['pBidi_Mirroring_Glyph'], []);
+read_separated_file('ucd/Blocks.txt', ['cBlock'], []);
+read_separated_file('ucd/CompositionExclusions.txt', 'bComposition_Exclusion', []);
+# read_separated_file('ucd/CaseFolding.txt', ['eCase_Folding_Type', 'sCase_Folding'], []);
+read_separated_file('ucd/DerivedAge.txt', ['cAge'], []);
+read_separated_file('ucd/EastAsianWidth.txt', ['eEast_Asian_Width'], []);
+read_separated_file('ucd/HangulSyllableType.txt', ['eHangul_Syllable_Type'], []);
+read_separated_file('ucd/LineBreak.txt', ['eLine_Break'], []);
+read_separated_file('ucd/Scripts.txt', ['cScript'], ['Common']);
+read_separated_file('ucd/SpecialCasing.txt', ['sUppercase_Mapping', 'sLowercase_Mapping',
 					  'sTitlecase_Mapping', 'mSpecial_Case_Condition'], []);
-read_separated_file('Jamo.txt', ['mJamo_Short_Name'], []);
-read_boolean_file('DerivedCoreProperties.txt');
-read_boolean_file('PropList.txt');
+read_separated_file('ucd/Jamo.txt', ['mJamo_Short_Name'], []);
+read_boolean_file('ucd/DerivedCoreProperties.txt');
+read_boolean_file('ucd/PropList.txt');
 
 #
 # Produce output
 #
-print "#include \"libucd_int.h\"\n\n";
 make_jamo_tables();
-
-
+make_names_list();
+make_name_gperf();
+dump_prop_list();
