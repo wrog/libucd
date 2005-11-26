@@ -1,7 +1,7 @@
 HOST_CC      = cc
 HOST_CFLAGS  = -g -O
 HOST_LDFLAGS =
-HOST_LIBS    =
+HOST_LIBS   += -lm
 
 .c.o:
 	$(HOST_CC) $(HOST_CFLAGS) -c $<
