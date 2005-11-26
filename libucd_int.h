@@ -9,9 +9,10 @@
 
 #include <stdlib.h>
 #include "ucd.h"
+#include "int24.h"
 
-extern const char libucv_hangul_jamo_l[][4];
-extern const char libucv_hangul_jamo_v[][4];
-extern const char libucv_hangul_jamo_t[][4];
+extern const char _libucd_hangul_jamo_l[][4];
+extern const char _libucd_hangul_jamo_v[][4];
+extern const char _libucd_hangul_jamo_t[][4];
 
 #endif

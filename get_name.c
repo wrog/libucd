@@ -40,7 +40,7 @@
  * its formal name.  Returns the length, or 0 if invalid.
  */
 
-size_t libucd_hangul_name(char *buf, size_t n, int32_t codepoint)
+size_t _libucd_hangul_name(char *buf, size_t n, int32_t codepoint)
 {
   /* See the Unicode Standard, version 4.1, section 3.12 */
   const int32_t SBase = 0xAC00;
@@ -72,7 +72,7 @@ size_t libucd_hangul_name(char *buf, size_t n, int32_t codepoint)
  * Naming for CJK unified ideographs
  */
 
-size_t libucd_cjk_name(char *buf, size_t n, int32_t codepoint)
+size_t _libucd_cjk_name(char *buf, size_t n, int32_t codepoint)
 {
   return snprintf(buf, n, "CJK UNIFIED IDEOGRAPH-%04X", codepoint);
 }

@@ -194,17 +194,17 @@ sub make_jamo_tables() {
     open($fh, '>', 'gen/jamo.c') or die "$0 cannot create gen/jamo.c";
     print $fh "#include \"libucd_int.h\"\n\n";
 
-    print $fh "const char libucd_hangul_jamo_l[$LCount][4] = {\n";
+    print $fh "const char _libucd_hangul_jamo_l[$LCount][4] = {\n";
     for ( $i = 0 ; $i < $LCount ; $i++ ) {
 	printf $fh "\t%s,\n", make_jamo_string(${$ucs_props{$LBase+$i}}{'Jamo_Short_Name'});
     }
     print $fh "};\n";
-    print $fh "const char libucd_hangul_jamo_v[$VCount][4] = {\n";
+    print $fh "const char _libucd_hangul_jamo_v[$VCount][4] = {\n";
     for ( $i = 0 ; $i < $VCount ; $i++ ) {
 	printf $fh "\t%s,\n", make_jamo_string(${$ucs_props{$VBase+$i}}{'Jamo_Short_Name'});
     }
     print $fh "};\n";
-    print $fh "const char libucd_hangul_jamo_t[$TCount][4] = {\n";
+    print $fh "const char _libucd_hangul_jamo_t[$TCount][4] = {\n";
     for ( $i = 0 ; $i < $TCount ; $i++ ) {
 	printf $fh "\t%s,\n", make_jamo_string(${$ucs_props{$TBase+$i}}{'Jamo_Short_Name'});
     }
@@ -229,7 +229,7 @@ sub make_names_list() {
     open($fh, '>', 'gen/nameslist.c') or die "$0: Cannot create gen/nameslist.c";
 
     print $fh "#include \"libucd_int.h\"\n\n";
-    print $fh "const char libucd_names_list[] = {";
+    print $fh "const char _libucd_names_list[] = {";
     $col = 9999;
 
     foreach $k ( sort {$a <=> $b} (keys(%ucs_props)) ) {
