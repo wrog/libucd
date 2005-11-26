@@ -26,21 +26,22 @@
  * ----------------------------------------------------------------------- */
 
 /*
- * hangul_name.c
+ * get_name.c
+ *
+ * Generate the character name from the codepoint number
+ */
+
+#include "libucd_int.h"
+
+/*
+ * libucd_hangul_name()
  *
  * Take a character in the range of the Hangul characters, and compute
  * its formal name.  Returns the length, or 0 if invalid.
  */
 
-#include "libucd_int.h"
-
-#define EMIT(x) ( (++len < n) && (*p++ = (x)) )
-
 size_t libucd_hangul_name(char *buf, size_t n, int32_t codepoint)
 {
-  char *p = buf;
-  size_t len = 0;
-
   /* See the Unicode Standard, version 4.1, section 3.12 */
   const int32_t SBase = 0xAC00;
   const int32_t LCount = 19;
@@ -65,4 +66,14 @@ size_t libucd_hangul_name(char *buf, size_t n, int32_t codepoint)
 		  libucd_hangul_jamo_t[T]);
 }
 
-  
+/*
+ * libucd_cjk_name()
+ *
+ * Naming for CJK unified ideographs
+ */
+
+size_t libucd_cjk_name(char *buf, size_t n, int32_t codepoint)
+{
+  return snprintf(buf, n, "CJK UNIFIED IDEOGRAPH-%04X", codepoint);
+}
+
