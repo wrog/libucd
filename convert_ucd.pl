@@ -310,6 +310,24 @@ sub make_name_keyfile()
 }
 
 #
+# Make a keyfile for all non-systematically named codepoints
+#
+sub make_named_ucs_keyfile()
+{
+    my $fh;
+    my $k;
+
+    open($fh, '>', 'gen/ucstoname.keys')
+	or die "$0: cannot write gen/ucstoname.keys\n";
+
+    foreach $k ( values(%name_to_ucs) ) {
+	printf $fh "%08x\n", $k;
+    }
+
+    close($fh);
+}
+
+#
 # Produce a list of character properties, sans names; this is
 # a test in order to figure out how much we could save from a
 # range-oriented table for everything except names.
@@ -395,4 +413,5 @@ read_boolean_file('ucd/PropList.txt');
 make_jamo_tables();
 make_names_list();
 make_name_keyfile();
+make_named_ucs_keyfile();
 dump_prop_list();
