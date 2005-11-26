@@ -263,23 +263,49 @@ sub make_names_list() {
 }
 
 #
-# Produce gperf output for names-to-UCS lookup
-# Note that Hangul syllabics are added to the gperf list but not
-# to the names list; we can verify the Hangul against the systematic
-# name generator.  However, for CJK it's easier to just do a pattern
-# match from the beginning.
+# Produce a list of names for automatic hash table generation.
+# This includes the Hangul syllables, but not systematically
+# named CJK.
 #
-sub make_name_gperf()
+sub write_hangul_names($)
+{
+    my ($fh) = @_;
+    my $SBase = 0xAC00;
+    my $LBase = 0x1100;
+    my $VBase = 0x1161;
+    my $TBase = 0x11A7;
+    my $LCount = 19;
+    my $VCount = 21;
+    my $TCount = 28;
+    my $SCount = $LCount*$VCount*$TCount;
+    my $l, $v, $t;
+
+    for ( $l = 0 ; $l < $LCount ; $l++ ) {
+	for ( $v = 0 ; $v < $VCount ; $v++ ) {
+	    for ( $t = 0 ; $t < $TCount ; $t++) {
+		printf $fh "HANGUL SYLLABLE %s%s%s\n",
+		${$ucs_props{$LBase+$l}}{'Jamo_Short_Name'},
+		${$ucs_props{$VBase+$v}}{'Jamo_Short_Name'},
+		${$ucs_props{$TBase+$t}}{'Jamo_Short_Name'};
+	    }
+	}
+    }
+}
+
+sub make_name_keyfile()
 {
     my $fh;
     my $k;
 
-    open($fh, '>', 'gen/nametoucs.gperf')
-	or die "$0: cannot write gen/nametoucs.gperf\n";
+    open($fh, '>', 'gen/nametoucs.keys')
+	or die "$0: cannot write gen/nametoucs.keys\n";
 
     foreach $k ( keys(%name_to_ucs) ) {
-	printf $fh "%s,%u\n", $k, $name_to_ucs{$k};
+	printf $fh "%s\n", $k;
     }
+
+    write_hangul_names($fh);
+
     close($fh);
 }
 
@@ -368,5 +394,5 @@ read_boolean_file('ucd/PropList.txt');
 #
 make_jamo_tables();
 make_names_list();
-make_name_gperf();
+make_name_keyfile();
 dump_prop_list();
