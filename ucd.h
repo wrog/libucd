@@ -322,7 +322,7 @@ enum unicode_general_category {
 #define UC_FL_WHITE_SPACE		UC_FLAG(34)
 #define UC_FL_BIDI_MIRRORED		UC_FLAG(35)
 
-struct unicode_char_data {
+struct unicode_character_data {
   uint64_t fl;			/* Flags */
   const char *name;
   const char *bidi_mirroring_glyph;
@@ -330,6 +330,7 @@ struct unicode_char_data {
   const char *uppercase_mapping;
   const char *lowercase_mapping;
   const char *titlecase_mapping;
+  int32_t ucs;			/* Actual codepoint */
   int32_t simple_uppercase;
   int32_t simple_lowercase;
   int32_t simple_titlecase;
