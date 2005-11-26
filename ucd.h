@@ -334,12 +334,14 @@ struct unicode_character_data {
   int32_t simple_uppercase;
   int32_t simple_lowercase;
   int32_t simple_titlecase;
-  int16_t numeric_value_num;
-  int16_t numeric_value_den;
+  /* Numeric value = num/den * 10^exp */
+  uint8_t numeric_value_num;
+  uint8_t numeric_value_den;
+  uint8_t numeric_value_exp;
   enum unicode_general_category         general_category;
   enum unicode_script                   script;
-  enum unicode_arabic_joining_type      joining_type;
-  enum unicode_arabic_joining_group     joining_group;
+  enum unicode_arabic_joining_type      arabic_joining_type;
+  enum unicode_arabic_joining_group     arabic_joining_group;
   enum unicode_east_asian_width         east_asian_width;
   enum unicode_hangul_syllable_type     hangul_syllable_type;
   enum unicode_line_break               line_break;
