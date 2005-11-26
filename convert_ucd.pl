@@ -377,6 +377,62 @@ sub dump_prop_list()
 }
 
 #
+# Produce the properties array
+#
+%prop_array_position = ();
+
+sub make_properties_array()
+{
+    my $fh, $c, $prev, $mine, $cnt, $cp;
+
+    # List of boolean properties that translate 1:1 into flags
+    my @boolean_props = ('Composition_Exclusion', 'Alphabetic', 'Default_Ignorable_Code_Point',
+			 'Lowercase', 'Grapheme_Base', 'Grapheme_Extend', 'ID_Start', 'ID_Continue',
+			 'Math', 'Uppercase', 'XID_Start', 'XID_Continue', 'Hex_Digit',
+			 'Bidi_Control', 'Dash', 'Deprecated', 'Diacritic', 'Extender',
+			 'Grapheme_Link', 'Ideographic', 'IDS_Binary_Operator',
+			 'IDS_Trinary_Operator', 'Join_Control', 'Logical_Order_Exception',
+			 'Noncharacter_Code_Point', 'Pattern_Syntax', 'Pattern_White_Space',
+			 'Quotation_Mark', 'Radical', 'Soft_Dotted', 'STerm',
+			 'Terminal_Punctuation', 'Unified_Ideograph', 'Variation_Selector',
+			 'White_Space', 'Bidi_Mirrored');
+
+    open($fh, '>', 'gen/proparray.c') or die;
+    binmode $fh, ':utf8';
+
+    undef $prev;
+    $cnt = 0;
+
+    for ( $c = 0 ; $c <= 0x10ffff ; $c++ ) {
+	$cp = $ucs_props{$c};
+	# Careful with the formatting: we rely on the fact that
+	# the first 14 characters contain the UCS value and the rest
+	# the properties.
+	$mine = sprintf("\t{\n\t\t0x%05x,\n", $c);
+	my $bp;
+	foreach $bp ( @boolean_props ) {
+	    if ( $$cp{$bp} ) {
+		$mine .= "\t\tUC_FL_\U$bp\E |\n";
+	    }
+	}
+	$mine .= "\t\t0,\n"; # Easy way to terminate a bit sequence
+
+	# Additional properties...
+	$mine .= "\t},\n";
+
+	if ( substr($prev,14) ne substr($mine,14) ) {
+	    print $fh $mine;
+	    $cnt++;
+	    $prev = $mine;
+	}
+	$prop_array_position{$c} = $cnt;
+    }
+    print $fh "\t/* Total: $cnt ranges */\n";
+
+    close($fh);
+}
+
+#
 # Import files
 #
 read_separated_file('ucd/UnicodeData.txt',
@@ -414,4 +470,5 @@ make_jamo_tables();
 make_names_list();
 make_name_keyfile();
 make_named_ucs_keyfile();
+make_properties_array();
 dump_prop_list();

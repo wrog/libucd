@@ -287,7 +287,7 @@ enum unicode_general_category {
 
 #define UC_FL_COMPOSITION_EXCLUSION     UC_FLAG(0)
 #define UC_FL_ALPHABETIC                UC_FLAG(1)
-#define UC_FL_DEFAULT_IGNORABLE         UC_FLAG(2)
+#define UC_FL_DEFAULT_IGNORABLE_CODE_POINT  UC_FLAG(2)
 #define UC_FL_LOWERCASE                 UC_FLAG(3)
 #define UC_FL_GRAPHEME_BASE             UC_FLAG(4)
 #define UC_FL_GRAPHEME_EXTEND           UC_FLAG(5)
@@ -309,7 +309,7 @@ enum unicode_general_category {
 #define UC_FL_IDS_TRINARY_OPERATOR      UC_FLAG(21)
 #define UC_FL_JOIN_CONTROL              UC_FLAG(22)
 #define UC_FL_LOGICAL_ORDER_EXCEPTION   UC_FLAG(23)
-#define UC_FL_NONCHARACTER              UC_FLAG(24)
+#define UC_FL_NONCHARACTER_CODE_POINT   UC_FLAG(24)
 #define UC_FL_PATTERN_SYNTAX            UC_FLAG(25)
 #define UC_FL_PATTERN_WHITE_SPACE       UC_FLAG(26)
 #define UC_FL_QUOTATION_MARK            UC_FLAG(27)
