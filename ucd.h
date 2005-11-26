@@ -212,6 +212,75 @@ enum unicode_word_break {
 
 enum unicode_line_break {
   UC_LB_XX = 0,
+  UC_LB_BK,
+  UC_LB_CR,
+  UC_LB_LF,
+  UC_LB_CM,
+  UC_LB_SG,
+  UC_LB_GL,
+  UC_LB_CB,
+  UC_LB_SP,
+  UC_LB_ZW,
+  UC_LB_NL,
+  UC_LB_WJ,
+  UC_LB_JL,
+  UC_LB_JV,
+  UC_LB_JT,
+  UC_LB_H2,
+  UC_LB_H3,
+  UC_LB_OP,
+  UC_LB_CL,
+  UC_LB_QU,
+  UC_LB_NS,
+  UC_LB_EX,
+  UC_LB_SY,
+  UC_LB_IS,
+  UC_LB_PR,
+  UC_LB_PO,
+  UC_LB_NU,
+  UC_LB_AL,
+  UC_LB_ID,
+  UC_LB_IN,
+  UC_LB_HY,
+  UC_LB_BB,
+  UC_LB_BA,
+  UC_LB_SA,
+  UC_LB_AI,
+  UC_LB_B2,
+};
+
+enum unicode_general_category {
+  UC_GC_XX = 0,
+  UC_GC_Cn,
+  UC_GC_Cc,
+  UC_GC_Cf,
+  UC_GC_Co,
+  UC_GC_Cs,
+  UC_GC_Ll,
+  UC_GC_Lm,
+  UC_GC_Lo,
+  UC_GC_Lt,
+  UC_GC_Lu,
+  UC_GC_Mc,
+  UC_GC_Me,
+  UC_GC_Mn,
+  UC_GC_Nd,
+  UC_GC_Nl,
+  UC_GC_No,
+  UC_GC_Pc,
+  UC_GC_Pd,
+  UC_GC_Pe,
+  UC_GC_Pf,
+  UC_GC_Pi,
+  UC_GC_Po,
+  UC_GC_Ps,
+  UC_GC_Sc,
+  UC_GC_Sk,
+  UC_GC_Sm,
+  UC_GC_So,
+  UC_GC_Zl,
+  UC_GC_Sp,
+  UC_GC_Zs,
 };
 
 #define UC_FLAG(x) (UINT64_C(1) << (x))
@@ -258,13 +327,16 @@ struct unicode_char_data {
   const char *name;
   const char *bidi_mirroring_glyph;
   const char *block;
+  const char *uppercase_mapping;
+  const char *lowercase_mapping;
+  const char *titlecase_mapping;
   int32_t simple_uppercase;
   int32_t simple_lowercase;
   int32_t simple_titlecase;
   int16_t numeric_value_num;
   int16_t numeric_value_den;
-  char script[4];
-  char gc[2];			/* General category */
+  enum unicode_general_category         general_category;
+  enum unicode_script                   script;
   enum unicode_arabic_joining_type      joining_type;
   enum unicode_arabic_joining_group     joining_group;
   enum unicode_east_asian_width         east_asian_width;
