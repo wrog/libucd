@@ -381,6 +381,14 @@ sub dump_prop_list()
 #
 %prop_array_position = ();
 
+sub emit_int24($) {
+    my($v) = @_;
+    return sprintf("{0x%02x, 0x%02x, 0x%02x}",
+		    $v & 0xff,
+		    ($v >> 8) & 0xff,
+		    ($v >> 16) & 0xff);
+}
+
 sub make_properties_array()
 {
     my $fh, $c, $prev, $mine, $cnt, $cp;
@@ -408,14 +416,99 @@ sub make_properties_array()
 	# Careful with the formatting: we rely on the fact that
 	# the first 14 characters contain the UCS value and the rest
 	# the properties.
+
+	# Code point UCS value
 	$mine = sprintf("\t{\n\t\t0x%05x,\n", $c);
+
+	# General category
+	my $gc = $$cp{'General_Category'} || 'Cn';
+	$mine .= "\t\tUC_GC_$gc,\n";
+
+	# Script
+	my $scr = $$cp{'Script'} || 'Common';
+	$mine .= "\t\tUC_SCR_$scr,\n";
+
+	# Numeric value
+	my $nv = $$cp{'Numeric_Value'};
+	if ( $nv > 255 ) {
+	    my $exp = int(log($nv)/log(10))-1;
+	    my $num = int($nv/(10**$exp));
+	    $mine .= "\t\t$num, 128+$exp,\n";
+	} else {
+	    my $num = $nv + 0;
+	    my $den = 1;
+
+	    if ( $nv != 0 ) {
+		while ( ($nv-($num/$den))/$nv > 1e-7 ) {
+		    $den++;
+		    $num = int($nv*$den+0.5);
+		}
+	    }
+	    $mine .= "\t\t$num, $den,\n";
+	}
+
+	# Boolean properties and block index
 	my $bp;
 	foreach $bp ( @boolean_props ) {
 	    if ( $$cp{$bp} ) {
 		$mine .= "\t\tUC_FL_\U$bp\E |\n";
 	    }
 	}
-	$mine .= "\t\t0,\n"; # Easy way to terminate a bit sequence
+	my $block = $$cp{'Block'};
+	$block =~ tr/ .-/___/;
+	$mine .= "\t\t(UC_BLK_$block << 48),\n";
+	
+	# Simple case mappings
+	my $sum = ($$cp{'Simple_Uppercase_Mapping'} || $c) - $c;
+	$mine .= "\t\t".emit_int24($sum).",\n";
+	my $slm = ($$cp{'Simple_Lowercase_Mapping'} || $c) - $c;
+	$mine .= "\t\t".emit_int24($slm).",\n";
+	my $stm = ($$cp{'Simple_Titlecase_Mapping'} || $c) - $c;
+	$mine .= "\t\t".emit_int24($stm).",\n";
+	
+	# Age (assume 31.7 as maximum; Unicode has traditionally not had
+	# many minor versions per major version.)
+	my $age = $$cp{'Age'} || '0.0';
+	my (@sage) = split(/\./, $age);
+	$mine .= sprintf("\t\t(%d << 5) + %d, /* $age */\n", $sage[0], $sage[1]);
+
+	# Padding
+	$mine .= "\t\t{ 0, 0, },\n";
+
+	# Arabic Joining Type
+	my $ajt = $$cp{'Arabic_Joining_Type'} ||
+	    ($gc eq 'Mn' || $gc eq 'Me' || $gc eq 'Cf') ? 'T' : 'U';
+	$mine .= "\t\tUC_AJT_$ajt,\n";
+
+	# Arabic Joining Group
+	my $ajg = $$cp{'Arabic_Joining_Group'} || 'No_Joining_Group';
+	$ajg =~ tr/ /_/;
+	$ajg =~ s/([A-Z])([A-Z]+)/$1\L$2\E/g;
+	$mine .= "\t\tUC_AJG_$ajg,\n";
+
+	# East Asian Width
+	my $eaw = $$cp{'East_Asian_Width'} || 'N';
+	$mine .= "\t\tUC_EAW_$eaw,\n";
+
+	# Hangul Syllable Type
+	my $hst = $$cp{'Hangul_Syllable_Type'} || 'NA';
+	$mine .= "\t\tUC_HST_$hst,\n";
+
+	# Line Break
+	my $lb = $$cp{'Line_Break'} || 'XX';
+	$mine .= "\t\tUC_LB_$lb,\n";
+
+	# Numeric Type
+	my $nt = $$cp{'Numeric_Type'} || 'None';
+	$mine .= "\t\tUC_NT_$nt,\n";
+
+	# Canonical Combining Class
+	my $ccc = $$cp{'Canonical_Combining_Class'} || 'NR';
+	$mine .= "\t\tUC_CCC_$ccc,\n";
+
+	# Bidi Class
+	my $bc = $$cp{'Bidi_Class'} || 'L';
+	$mine .= "\t\tUC_BC_$bc,\n";
 
 	# Additional properties...
 	$mine .= "\t},\n";
