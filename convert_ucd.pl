@@ -4,8 +4,6 @@
 # into data for libucd.
 #
 
-use POSIX;
-
 #
 # Internally this file uses a hash with the UCS value as key, and
 # as data another hash from property name to value.
@@ -35,6 +33,7 @@ sub read_separated_file($$$) {
     my $line, @fields, $c0, $c1, $c;
     my $was_first = 0;
 
+    print STDERR "Reading $filename\n";
     open($fh, '<', $filename) or return 0;
     while ( defined($line = <$fh>) ) {
 	chomp $line;
@@ -116,6 +115,7 @@ sub read_boolean_file($) {
     my $fh;
     my $line, @fields, $c0, $c1, $c;
 
+    print STDERR "Reading $filename\n";
     open($fh, '<', $filename) or return 0;
     while ( defined($line = <$fh>) ) {
 	chomp $line;
@@ -139,27 +139,6 @@ sub read_boolean_file($) {
     close($fh);
 
     return 1;
-}
-
-# UCD numeric values are given as 8-significant figures floating-point
-# numbers, but in reality they are all fractions.  This converts a
-# floating-point number to a numerator and denominator with just about
-# enough fuzz.
-#
-# Note: the denominator will always be positive, and will always be 1
-# if the number is an integer.
-sub make_fraction($) {
-    my ($v) = @_;
-    my $n, $d, $minus;
-
-    return [0, 1] if ( $v == 0 );
-
-    $d = 1;
-    while ( 1 ) {
-	$n = floor($v*$d + 0.5);
-	return [$n, $d] if ( abs($n/$d-$v)/$v < 1e-7 );
-	$d++;
-    }
 }
 
 sub make_jamo_string($) {
@@ -191,6 +170,7 @@ sub make_jamo_tables() {
     # None of the syllables exceed 4 bytes, so let's not waste
     # pointer space that might have to be relocated...
 
+    print STDERR "Writing gen/jamo.c\n";
     open($fh, '>', 'gen/jamo.c') or die "$0 cannot create gen/jamo.c";
     print $fh "#include \"libucd_int.h\"\n\n";
 
@@ -226,6 +206,7 @@ sub make_names_list() {
     my $fh;
     my $col;
 
+    print STDERR "Writing gen/nameslist.c\n";
     open($fh, '>', 'gen/nameslist.c') or die "$0: Cannot create gen/nameslist.c";
 
     print $fh "#include \"libucd_int.h\"\n\n";
@@ -297,6 +278,7 @@ sub make_name_keyfile()
     my $fh;
     my $k;
 
+    print STDERR "Writing gen/nametoucs.keys\n";
     open($fh, '>', 'gen/nametoucs.keys')
 	or die "$0: cannot write gen/nametoucs.keys\n";
 
@@ -317,6 +299,7 @@ sub make_named_ucs_keyfile()
     my $fh;
     my $k;
 
+    print STDERR "Writing gen/ucstoname.keys\n";
     open($fh, '>', 'gen/ucstoname.keys')
 	or die "$0: cannot write gen/ucstoname.keys\n";
 
@@ -336,6 +319,7 @@ sub dump_prop_list()
 {
     my $fh, $c;
 
+    print STDERR "Writing gen/propdump.txt\n";
     open($fh, '>', 'gen/propdump.txt')
 	or die "$0: cannot write gen/propdump.txt\n";
     binmode $fh, ':utf8';
@@ -405,6 +389,7 @@ sub make_properties_array()
 			 'Terminal_Punctuation', 'Unified_Ideograph', 'Variation_Selector',
 			 'White_Space', 'Bidi_Mirrored');
 
+    print STDERR "Writing gen/proparray.c\n";
     open($fh, '>', 'gen/proparray.c') or die;
     binmode $fh, ':utf8';
 
@@ -454,9 +439,9 @@ sub make_properties_array()
 		$mine .= "\t\tUC_FL_\U$bp\E |\n";
 	    }
 	}
-	my $block = $$cp{'Block'};
+	my $block = $$cp{'Block'} || 'No_Block';
 	$block =~ tr/ .-/___/;
-	$mine .= "\t\t(UC_BLK_$block << 48),\n";
+	$mine .= "\t\t((uint64_t)UC_BLK_$block << 48),\n";
 	
 	# Simple case mappings
 	my $sum = ($$cp{'Simple_Uppercase_Mapping'} || $c) - $c;
@@ -472,19 +457,36 @@ sub make_properties_array()
 	my (@sage) = split(/\./, $age);
 	$mine .= sprintf("\t\t(%d << 5) + %d, /* $age */\n", $sage[0], $sage[1]);
 
-	# Padding
-	$mine .= "\t\t{ 0, 0, },\n";
+	# Canonical Combining Class
+	my $ccc = $$cp{'Canonical_Combining_Class'} || 'NR';
+	if ( $ccc =~ /^[0-9]+$/ ) {
+	    $mine .= "\t\t$ccc,\n"; # Numeric CCC
+	} else {
+	    $mine .= "\t\tUC_CCC_$ccc,\n";
+	}
+
+	# Sentence Break
+	my $sb = $$cp{'Sentence_Break'} || 'Other';
+	$mine .= "\t\tUC_SB_$sb,\n";
+
+	# Grapheme Cluster Break
+	my $gcb = $$cp{'Grapheme_Cluster_Break'} || 'Other';
+	$mine .= "\t\tUC_GCB_$gcb,\n";
+
+	# Word Break
+	my $wb = $$cp{'Word_Break'} || 'Other';
+	$mine .= "\t\tUC_WB_$wb,\n";
 
 	# Arabic Joining Type
-	my $ajt = $$cp{'Arabic_Joining_Type'} ||
+	my $ajt = $$cp{'Joining_Type'} ||
 	    ($gc eq 'Mn' || $gc eq 'Me' || $gc eq 'Cf') ? 'T' : 'U';
-	$mine .= "\t\tUC_AJT_$ajt,\n";
+	$mine .= "\t\tUC_JT_$ajt,\n";
 
 	# Arabic Joining Group
-	my $ajg = $$cp{'Arabic_Joining_Group'} || 'No_Joining_Group';
+	my $ajg = $$cp{'Joining_Group'} || 'No_Joining_Group';
 	$ajg =~ tr/ /_/;
 	$ajg =~ s/([A-Z])([A-Z]+)/$1\L$2\E/g;
-	$mine .= "\t\tUC_AJG_$ajg,\n";
+	$mine .= "\t\tUC_JG_$ajg,\n";
 
 	# East Asian Width
 	my $eaw = $$cp{'East_Asian_Width'} || 'N';
@@ -502,13 +504,9 @@ sub make_properties_array()
 	my $nt = $$cp{'Numeric_Type'} || 'None';
 	$mine .= "\t\tUC_NT_$nt,\n";
 
-	# Canonical Combining Class
-	my $ccc = $$cp{'Canonical_Combining_Class'} || 'NR';
-	$mine .= "\t\tUC_CCC_$ccc,\n";
-
 	# Bidi Class
 	my $bc = $$cp{'Bidi_Class'} || 'L';
-	$mine .= "\t\tUC_BC_$bc,\n";
+	$mine .= "\t\tUC_BIDI_$bc,\n";
 
 	# Additional properties...
 	$mine .= "\t},\n";
@@ -553,6 +551,9 @@ read_separated_file('ucd/Scripts.txt', ['cScript'], ['Common']);
 read_separated_file('ucd/SpecialCasing.txt', ['sUppercase_Mapping', 'sLowercase_Mapping',
 					  'sTitlecase_Mapping', 'mSpecial_Case_Condition'], []);
 read_separated_file('ucd/Jamo.txt', ['mJamo_Short_Name'], []);
+read_separated_file('ucd/auxilliary/GraphemeBreakProperty.txt', ['eGrapheme_Cluster_Break'], []);
+read_separated_file('ucd/auxilliary/SentenceBreakProperty.txt', ['eSentence_Break'], []);
+read_separated_file('ucd/auxilliary/WordBreakProperty.txt', ['eWord_Break'], []);
 read_boolean_file('ucd/DerivedCoreProperties.txt');
 read_boolean_file('ucd/PropList.txt');
 
@@ -564,4 +565,4 @@ make_names_list();
 make_name_keyfile();
 make_named_ucs_keyfile();
 make_properties_array();
-dump_prop_list();
+# dump_prop_list();
