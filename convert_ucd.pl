@@ -193,11 +193,7 @@ sub make_jamo_tables() {
     close($fh);
 }
 
-# This produces a names list, and stores for each character which index in
-# the names list they correspond to.  We use a long names list with indexes
-# instead of pointers to avoid fixups, and to conserve space on 64-bit
-# architectures.  Sort it in order by keyspace to improve cache locality.
-%name_to_index = ();
+# This produces a names list sorted by UCS, and produces a reverse map.
 %name_to_ucs   = ();
 
 sub make_names_list() {
@@ -206,12 +202,8 @@ sub make_names_list() {
     my $fh;
     my $col;
 
-    print STDERR "Writing gen/nameslist.c\n";
-    open($fh, '>', 'gen/nameslist.c') or die "$0: Cannot create gen/nameslist.c";
-
-    print $fh "#include \"libucd_int.h\"\n\n";
-    print $fh "const char _libucd_names_list[] = {";
-    $col = 9999;
+    print STDERR "Writing gen/nameslist.tab\n";
+    open($fh, '>', 'gen/nameslist.tab') or die;
 
     foreach $k ( sort {$a <=> $b} (keys(%ucs_props)) ) {
 	print STDERR "Not a number: \"$k\"\n" if ( $k ne ($k+0) );
@@ -223,23 +215,10 @@ sub make_names_list() {
 		$n, $k, $name_to_ucs{$n};
 	    } else {
 		$name_to_ucs{$n} = $k;
-		$name_to_index{$n} = $pos;
-		$pos += length($n) + 1;
-		my $i;
-		for ( $i = 0 ; $i <= length($n) ; $i++ ) {
-		    my $c = substr($n,$i,1);
-		    
-		    if ( $col >= 72 ) {
-			print $fh "\n\t";
-			$col = 8;
-		    }
-		    print $fh ( $c ne '' ) ? " \'$c\'," : "   0,";
-		    $col += 5;
-		}
+		printf $fh "%05x %s\n", $k, $n;
 	    }
 	}
     }
-    print $fh "\n};\n";
     close($fh);
 }
 
@@ -248,9 +227,9 @@ sub make_names_list() {
 # This includes the Hangul syllables, but not systematically
 # named CJK.
 #
-sub write_hangul_names($)
+sub write_hangul_names($$)
 {
-    my ($fh) = @_;
+    my ($fh, $fht) = @_;
     my $SBase = 0xAC00;
     my $LBase = 0x1100;
     my $VBase = 0x1161;
@@ -259,15 +238,20 @@ sub write_hangul_names($)
     my $VCount = 21;
     my $TCount = 28;
     my $SCount = $LCount*$VCount*$TCount;
-    my $l, $v, $t;
+    my $l, $v, $t, $c;
 
+    $c = $SBase;
     for ( $l = 0 ; $l < $LCount ; $l++ ) {
 	for ( $v = 0 ; $v < $VCount ; $v++ ) {
 	    for ( $t = 0 ; $t < $TCount ; $t++) {
-		printf $fh "HANGUL SYLLABLE %s%s%s\n",
-		${$ucs_props{$LBase+$l}}{'Jamo_Short_Name'},
-		${$ucs_props{$VBase+$v}}{'Jamo_Short_Name'},
-		${$ucs_props{$TBase+$t}}{'Jamo_Short_Name'};
+		my $name = sprintf("HANGUL SYLLABLE %s%s%s",
+				   ${$ucs_props{$LBase+$l}}{'Jamo_Short_Name'},
+				   ${$ucs_props{$VBase+$v}}{'Jamo_Short_Name'},
+				   ${$ucs_props{$TBase+$t}}{'Jamo_Short_Name'});
+		printf $fh "%s\n", $name;
+		printf $fht "%05x %s\n", $c, $name;
+
+		$c++;
 	    }
 	}
     }
@@ -275,20 +259,22 @@ sub write_hangul_names($)
 
 sub make_name_keyfile()
 {
-    my $fh;
+    my $fh, $fht;
     my $k;
 
-    print STDERR "Writing gen/nametoucs.keys\n";
-    open($fh, '>', 'gen/nametoucs.keys')
-	or die "$0: cannot write gen/nametoucs.keys\n";
+    print STDERR "Writing gen/nametoucs.keys and gen/nametoucs.tab\n";
+    open($fh, '>', 'gen/nametoucs.keys') or die;
+    open($fht, '>', 'gen/nametoucs.tab') or die;
 
     foreach $k ( keys(%name_to_ucs) ) {
 	printf $fh "%s\n", $k;
+	printf $fht "%05x %s\n", $name_to_ucs{$k}, $k;
     }
 
-    write_hangul_names($fh);
+    write_hangul_names($fh, $fht);
 
     close($fh);
+    close($fht);
 }
 
 #
@@ -375,7 +361,7 @@ sub emit_int24($) {
 
 sub make_properties_array()
 {
-    my $fh, $c, $prev, $mine, $cnt, $cp;
+    my $fh, $fhi, $c, $prev, $mine, $cnt, $cp;
 
     # List of boolean properties that translate 1:1 into flags
     my @boolean_props = ('Composition_Exclusion', 'Alphabetic', 'Default_Ignorable_Code_Point',
@@ -389,8 +375,9 @@ sub make_properties_array()
 			 'Terminal_Punctuation', 'Unified_Ideograph', 'Variation_Selector',
 			 'White_Space', 'Bidi_Mirrored');
 
-    print STDERR "Writing gen/proparray.c\n";
+    print STDERR "Writing gen/proparray.c and gen/proparrayindex\n";
     open($fh, '>', 'gen/proparray.c') or die;
+    open($fhi, '>', 'gen/proparrayindex') or die;
     binmode $fh, ':utf8';
 
     undef $prev;
@@ -517,10 +504,12 @@ sub make_properties_array()
 	    $prev = $mine;
 	}
 	$prop_array_position{$c} = $cnt;
+	printf $fhi "0x%05x $cnt\n", $c, $cnt;
     }
     print $fh "\t/* Total: $cnt ranges */\n";
 
     close($fh);
+    close($fhi);
 }
 
 #

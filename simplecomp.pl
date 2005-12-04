@@ -8,6 +8,8 @@
 # phrases.
 #
 
+use bytes;
+
 sub split_by_word($) {
     my ($str) = @_;
     my @l = ();
@@ -46,16 +48,21 @@ sub split_by_word($) {
 while ( defined($line = <STDIN>) ) {
     chomp $line;
 
+    $ix = hex substr($line,0,5);
+    $name = substr($line,6);
+
     # Add a redundant space to each name; we remove this one
     # automatically during decoding
-    $line .= ' ';
+    # XXX: Try with and without this
+    $name .= ' ';
 
     my $ut, $utx;
     foreach $ut ( @unitokens ) {
 	($utx = $ut) =~ tr/ -/_+/;
-	$line =~ s/\b$ut\b/$utx/g;
+	$name =~ s/\b$ut\b/$utx/g;
     }
-    push(@names, $line);
+    push(@names, $name);
+    $name_to_ucs{$name} = $ix;
 }
 
 #
@@ -117,20 +124,25 @@ print "Bytes saved: $s\n";
 # Sort dictionary in order by decreasing length
 @dictionary = sort { length($b) <=> length($a) } @dictionary;
 
-open(NLC, '>', 'gen/namelist.compr') or die;
-foreach $n ( sort(@names) ) {
-    $n =~ tr/_+/ -/;
+$offset = 0;
+open(NLC, '>', 'gen/nameslist.compr') or die;
+open(NLO, '>', 'gen/nameslist.offset') or die;
+foreach $n ( @names ) {
+    ($na = $n) =~ tr/_+/ -/;
     foreach $di ( @dictionary ) {
 	$c = chr($symbol_index{$di});
 	$di =~ tr/_+/ -/;
-	$n =~ s/$di/$c/g;
+	$na =~ s/$di/$c/g;
     }
-    print NLC $n, "\0";
+    print  NLC $na, "\0";
+    printf NLO "%05x %d\n", $name_to_ucs{$n}, $offset;
+    $offset += length($na)+1;
 }
 close(NLC);
+close(NLO);
 
-open(NLD, '>', 'gen/namelist_dict.c') or die;
-printf NLD "const char * const _libucd_namelist_dict[%d] = {\n", $dict_len+1;
+open(NLD, '>', 'gen/nameslist_dict.c') or die;
+printf NLD "const char * const _libucd_nameslist_dict[%d] = {\n", $dict_len+1;
 for ( $i = 0 ; $i <= $dict_len ; $i++ ) {
     $sym = $symbols[$i];
     $sym =~ tr/_+/ -/;
