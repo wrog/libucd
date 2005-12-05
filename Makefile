@@ -110,13 +110,13 @@ gen/nametoucs_tab.c: gen/mk_nametoucs_tab gen/nametoucs.tab
 	gen/mk_nametoucs_tab
 
 
-$(LIB_FILE): $(LIB_OBJS)
+$(LIB_FILE): $(LIBOBJS)
 	rm -f $(LIB_FILE)
-	$(AR) cq $(LIB_FILE) $(LIB_OBJS)
+	$(AR) cq $(LIB_FILE) $^
 	$(RANLIB) $(LIB_FILE)
 
 $(SO_FILE): $(SO_OBJS)
-	$(CC) $(SOFLAGS) -o $(SO_FILE) $(SO_OBJS)
+	$(CC) $(SOFLAGS) -o $(SO_FILE) $^
 
 ifneq ($(SO_NAME),$(SO_FILE))
 $(SO_NAME): $(SO_FILE)

@@ -50,10 +50,11 @@ while ( ($n = read(STDIN, $data, 4096)) > 0 ) {
     }
 }
 
-printf "\n};\n\nunsigned int %s_len = %u;\n", $table_name, $total_len;
+printf "\n};\n";
 
-@st = stat STDIN;
 
-printf "\nint %s_mtime = %d;\n", $table_name, $st[9];
+# @st = stat STDIN;
+# printf "\nunsigned int %s_len = %u;\n", $table_name, $total_len;
+# printf "\nint %s_mtime = %d;\n", $table_name, $st[9];
 
 exit 0;
