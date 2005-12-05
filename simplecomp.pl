@@ -124,16 +124,32 @@ print "Bytes saved: $s\n";
 # Sort dictionary in order by decreasing length
 @dictionary = sort { length($b) <=> length($a) } @dictionary;
 
+sub compress_string($) {
+    my ($na) = @_;
+    my $di, $c;
+
+    foreach $di ( @dictionary ) {
+	die "No index for symbol: $di\n" unless ($symbol_index{$di});
+	$c = chr($symbol_index{$di});
+	($rd = $di) =~ tr/_+/ -/;
+	$na =~ s/$rd/$c/g;
+    }
+
+    return $na;
+}
+
 $offset = 0;
 open(NLC, '>', 'gen/nameslist.compr') or die;
 open(NLO, '>', 'gen/nameslist.offset') or die;
 foreach $n ( @names ) {
-    ($na = $n) =~ tr/_+/ -/;
-    foreach $di ( @dictionary ) {
-	$c = chr($symbol_index{$di});
-	$di =~ tr/_+/ -/;
-	$na =~ s/$di/$c/g;
-    }
+    ($na1 = $n) =~ tr/_+/ -/;
+    ($na2 = $na1) =~ s/ $//;
+
+    $na1 = compress_string($na1);
+    $na2 = compress_string($na2);
+    
+    $na = length($na1) < length($na2) ? $na1 : $na2;
+
     print  NLC $na, "\0";
     printf NLO "%05x %d\n", $name_to_ucs{$n}, $offset;
     $offset += length($na)+1;
