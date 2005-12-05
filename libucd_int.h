@@ -47,4 +47,8 @@ struct _libucd_ucstoname_tab {
   uint16_t proparray_offset;
 };
 
+struct _libucd_nametoucs_tab {
+  int24	   ucs;
+};
+
 #endif

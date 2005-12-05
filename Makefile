@@ -2,6 +2,12 @@ CC	     = cc
 CFLAGS	     = -g -O -I. -W -Wall
 PICFLAGS     = -fPIC
 LDFLAGS      =
+AR           = ar
+RANLIB       = ranlib
+LIB_FILE     = libucd.a
+SO_FILE      = libucd.so
+SO_NAME      = libucd.so.0
+SOFLAGS      = -shared -Wl,-soname,$(SO_NAME)
 
 HOST_CC      = cc
 HOST_CFLAGS  = -g -O -I. -W -Wall
@@ -9,6 +15,7 @@ HOST_LDFLAGS =
 HOST_LIBS    =
 
 PERL         = time perl
+
 
 #
 # These are the files produced by convert_ucd.pl
@@ -38,16 +45,16 @@ CVT_FILES = gen/jamo.c gen/nameslist.tab gen/nametoucs.keys gen/nametoucs.tab \
 
 # -----------------------------------------------------------------------
 
-LIBSRC = proparray.c gen/nametoucs_hash.c gen/ucstoname_hash.c \
-	 gen/jamo.c gen/nameslist.c gen/nameslist_dict.c \
-	 gen/ucstoname_tab.c
+LIBSRCS = proparray.c gen/nametoucs_hash.c gen/ucstoname_hash.c \
+	  gen/jamo.c gen/nameslist.c gen/nameslist_dict.c \
+	  gen/ucstoname_tab.c gen/nametoucs_tab.c
 
-LIBOBJ = $(patsubst %.c,%.o,$(LIBSRC))
-SO_OBJ = $(patsubst %.c,%.lo,$(LIBSRC))
+LIBOBJS = $(patsubst %.c,%.o,$(LIBSRCS))
+SO_OBJS = $(patsubst %.c,%.lo,$(LIBSRCS))
 
 # -----------------------------------------------------------------------
 
-all : $(LIBOBJ) $(SO_OBJ)
+all : $(LIB_FILE) $(SO_FILE) $(SO_NAME)
 
 clean:
 	rm -rf gen
@@ -96,15 +103,39 @@ gen/ucstoname_tab.c: gen/mk_ucstoname_tab \
 		     gen/proparrayindex gen/nameslist.offset
 	gen/mk_ucstoname_tab
 
+gen/mk_nametoucs_tab: mk_nametoucs_tab.ho gen/nametoucs_hash.ho
+	$(HOST_CC) $(HOST_LDFLAGS) -o $@ $^ $(HOST_LIBS)
+
+gen/nametoucs_tab.c: gen/mk_nametoucs_tab gen/nametoucs.tab
+	gen/mk_nametoucs_tab
+
+
+$(LIB_FILE): $(LIB_OBJS)
+	rm -f $(LIB_FILE)
+	$(AR) cq $(LIB_FILE) $(LIB_OBJS)
+	$(RANLIB) $(LIB_FILE)
+
+$(SO_FILE): $(SO_OBJS)
+	$(CC) $(SOFLAGS) -o $(SO_FILE) $(SO_OBJS)
+
+ifneq ($(SO_NAME),$(SO_FILE))
+$(SO_NAME): $(SO_FILE)
+	ln -f $(SO_FILE) $(SO_NAME)
+endif
+
 # -----------------------------------------------------------------------
 
 proparray.o: proparray.c ucd.h libucd_int.h gen/proparray.c
 proparray.lo: proparray.c ucd.h libucd_int.h gen/proparray.c
 
 mk_ucstoname_tab.ho: gen/ucstoname_hash.h
+mk_nametoucs_tab.ho: gen/nametoucs_hash.h
 
 gen/ucstoname_tab.o: gen/ucstoname_tab.c libucd_int.h
 gen/ucstoname_tab.lo: gen/ucstoname_tab.c libucd_int.h
+
+gen/nametoucs_tab.o: gen/nametoucs_tab.c libucd_int.h
+gen/nametoucs_tab.lo: gen/nametoucs_tab.c libucd_int.h
 
 gen/nameslist_dict.o: gen/nameslist_dict.c
 gen/nameslist_dict.lo: gen/nameslist_dict.c
