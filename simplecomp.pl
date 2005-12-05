@@ -85,18 +85,17 @@ foreach $n ( @names ) {
 @dictionary = split(//, " -0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ");
 
 $base_dict = scalar(@dictionary);
-$dict_len = 255;
+$dict_len = 256;
 
 %symbol_index = ();
-@symbols = (undef) x ($dict_len+1);
-$symbols[0] = '';
+@symbols = (undef) x ($dict_len);
 
 # Identity-map single characters
 foreach $scs ( @dictionary ) {
     $symbols[ord($scs)] = $scs;
     $symbol_index{$scs} = ord($scs);
 }
-$next_index = 1;
+$next_index = 0;
 
 while ( scalar(@dictionary) < $dict_len ) {
     push(@dictionary, shift(@commons));
@@ -118,9 +117,6 @@ for ( $i = 0 ; $i < $dict_len ; $i++ ) {
     }
 }
 
-
-print "Bytes saved: $s\n";
-
 # Sort dictionary in order by decreasing length
 @dictionary = sort { length($b) <=> length($a) } @dictionary;
 
@@ -129,7 +125,7 @@ sub compress_string($) {
     my $di, $c;
 
     foreach $di ( @dictionary ) {
-	die "No index for symbol: $di\n" unless ($symbol_index{$di});
+	die "No index for symbol: $di\n" unless (defined($symbol_index{$di}));
 	$c = chr($symbol_index{$di});
 	($rd = $di) =~ tr/_+/ -/;
 	$na =~ s/$rd/$c/g;
@@ -139,27 +135,35 @@ sub compress_string($) {
 }
 
 $offset = 0;
+$uc_bytes = 0;
+
 open(NLC, '>', 'gen/nameslist.compr') or die;
 open(NLO, '>', 'gen/nameslist.offset') or die;
 foreach $n ( @names ) {
     ($na1 = $n) =~ tr/_+/ -/;
     ($na2 = $na1) =~ s/ $//;
-
+    $true_name = $na2;		# Actually desired output
+    
     $na1 = compress_string($na1);
     $na2 = compress_string($na2);
     
     $na = length($na1) < length($na2) ? $na1 : $na2;
 
-    print  NLC $na, "\0";
+    # Prefix byte for *uncompressed* length, then compressed data
+    print  NLC chr(length($true_name)), $na;
     printf NLO "%05x %d\n", $name_to_ucs{$n}, $offset;
     $offset += length($na)+1;
+    $uc_bytes += length($true_name)+1;
 }
 close(NLC);
 close(NLO);
 
+print "uncompressed $uc_bytes bytes, compressed $offset bytes\n";
+printf "savings %d (%.1f%%)\n", $uc_bytes-$offset, 100*(1-$offset/$uc_bytes);
+
 open(NLD, '>', 'gen/nameslist_dict.c') or die;
-printf NLD "const char * const _libucd_nameslist_dict[%d] = {\n", $dict_len+1;
-for ( $i = 0 ; $i <= $dict_len ; $i++ ) {
+printf NLD "const char * const _libucd_nameslist_dict[%d] = {\n", $dict_len;
+for ( $i = 0 ; $i < $dict_len ; $i++ ) {
     $sym = $symbols[$i];
     $sym =~ tr/_+/ -/;
     printf NLD "\t\"%s\",\n", $sym;
