@@ -27,7 +27,7 @@ struct _libucd_property_array {
   int24    simple_uppercase;
   int24    simple_lowercase;
   int24    simple_titlecase;
-  uint8_t  age;			/* (major << 5) + minor */
+  uint8_t  age;			/* (major << 3) + minor */
   uint8_t  combining_class;
   unsigned sentence_break	:4;
   unsigned grapheme_cluster_break :4;
@@ -42,6 +42,7 @@ struct _libucd_property_array {
   unsigned /* unused */         :1;
 } ALIGNED(32);
 extern const struct _libucd_property_array _libucd_property_array[];
+extern const int _libucd_property_array_count;
 
 struct _libucd_ucstoname_tab {
   int24    ucs;
@@ -54,5 +55,8 @@ struct _libucd_nametoucs_tab {
   int24	   ucs;
 };
 extern const struct _libucd_nametoucs_tab _libucd_nametoucs_tab[];
+
+#define UCS_CNT	0x110000
+#define UCS_MAX (UCS_CNT-1)
 
 #endif

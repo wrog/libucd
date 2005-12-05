@@ -442,7 +442,7 @@ sub make_properties_array()
 	# many minor versions per major version.)
 	my $age = $$cp{'Age'} || '0.0';
 	my (@sage) = split(/\./, $age);
-	$mine .= sprintf("\t\t(%d << 5) + %d, /* $age */\n", $sage[0], $sage[1]);
+	$mine .= sprintf("\t\t(%d << 3) + %d, /* $age */\n", $sage[0], $sage[1]);
 
 	# Canonical Combining Class
 	my $ccc = $$cp{'Canonical_Combining_Class'} || 'NR';

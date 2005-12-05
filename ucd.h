@@ -554,6 +554,7 @@ struct unicode_character_data {
   uint8_t numeric_value_num;
   uint8_t numeric_value_den;
   uint8_t numeric_value_exp;
+  uint8_t age_ma, age_mi;
   enum unicode_general_category         general_category;
   enum unicode_block			block;
   enum unicode_script                   script;
