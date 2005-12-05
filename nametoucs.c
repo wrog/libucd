@@ -17,7 +17,7 @@ static uint32_t prehash(const char *str)
 }
 
 /* This returns a candidate UCS for a given name. */
-int32_t _libucd_ucs_to_name(const char *name)
+int32_t _libucd_name_to_ucs(const char *name)
 {
   int32_t ucs;
   uint32_t hash;
