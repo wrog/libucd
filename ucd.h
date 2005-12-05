@@ -582,5 +582,6 @@ struct unicode_character_data {
 struct unicode_character_data *unicode_character_data(int32_t);
 struct unicode_character_data *unicode_character_get(struct unicode_character_data *);
 void unicode_character_put(struct unicode_character_data *);
+struct unicode_character_data *unicode_character_lookup(const char *);
 
 #endif /* UCD_H */

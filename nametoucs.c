@@ -17,7 +17,7 @@ static uint32_t prehash(const char *str)
 }
 
 /* This returns a candidate UCS for a given name. */
-int32_t _libucd_name_to_ucs(const char *name)
+static int32_t name_lookup(const char *name)
 {
   int32_t ucs;
   uint32_t hash;
@@ -38,5 +38,17 @@ int32_t _libucd_name_to_ucs(const char *name)
   return ucs;
 }
 
-    
-    
+struct unicode_character_data *
+unicode_character_lookup(const char *name)
+{
+  int32_t ucs = name_lookup(name);
+  struct unicode_character_data *ucd =
+    unicode_character_data(ucs);
+
+  if ( !ucd->name || strcmp(name, ucd->name) ) {
+    unicode_character_put(ucd);
+    return NULL;
+  }
+  
+  return ucd;
+}
