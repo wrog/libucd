@@ -502,9 +502,9 @@ sub make_properties_array()
 	    print $fh $mine;
 	    $cnt++;
 	    $prev = $mine;
+	    printf $fhi "0x%05x $cnt\n", $c, $cnt;
 	}
 	$prop_array_position{$c} = $cnt;
-	printf $fhi "0x%05x $cnt\n", $c, $cnt;
     }
     print $fh "\t/* Total: $cnt ranges */\n";
 

@@ -17,7 +17,7 @@ extern const char _libucd_hangul_jamo_t[][4];
 
 /* This structure is exactly 32 bytes long, nice and alignable. */
 struct _libucd_property_array {
-  int32_t  ucd;			/* Wasteful but fast (used in search) */
+  int32_t  ucs;			/* Wasteful but fast (used in search) */
   uint8_t  general_category;
   uint8_t  script;
   uint8_t  numeric_value_num;
@@ -39,6 +39,12 @@ struct _libucd_property_array {
   unsigned numeric_type         :2;
   unsigned bidi_class           :5;
   unsigned /* unused */         :1;
+};
+
+struct _libucd_ucstoname_tab {
+  int24    ucs;
+  uint24   names_offset;
+  uint16_t proparray_offset;
 };
 
 #endif

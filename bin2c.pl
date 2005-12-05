@@ -26,7 +26,7 @@ if ( $#ARGV != 0 ) {
 
 ($table_name) = @ARGV;
 
-printf "unsigned char %s[] = {\n", $table_name;
+printf "const unsigned char %s[] = {\n", $table_name;
 
 $pos = 0;
 $linelen = 8;
