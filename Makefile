@@ -47,7 +47,8 @@ CVT_FILES = gen/jamo.c gen/nameslist.tab gen/nametoucs.keys gen/nametoucs.tab \
 
 LIBSRCS = proparray.c gen/nametoucs_hash.c gen/ucstoname_hash.c \
 	  gen/jamo.c gen/nameslist.c gen/nameslist_dict.c \
-	  gen/ucstoname_tab.c gen/nametoucs_tab.c nametoucs.c
+	  gen/ucstoname_tab.c gen/nametoucs_tab.c nametoucs.c \
+	  ucslookup.c
 
 LIBOBJS = $(patsubst %.c,%.o,$(LIBSRCS))
 SO_OBJS = $(patsubst %.c,%.lo,$(LIBSRCS))
@@ -142,3 +143,6 @@ gen/nameslist_dict.lo: gen/nameslist_dict.c
 
 nametoucs.o: nametoucs.c libucd_int.h gen/nametoucs_hash.h
 nametoucs.lo: nametoucs.c libucd_int.h gen/nametoucs_hash.h
+
+ucslookup.o: ucslookup.c libucd_int.h gen/ucstoname_hash.h
+ucslookup.lo: ucslookup.c libucd_int.h gen/ucstoname_hash.h
