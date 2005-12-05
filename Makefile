@@ -1,7 +1,7 @@
 CC	     = cc
-CFLAGS	     = -g -O -I. -W -Wall
+CFLAGS	     = -g -O3 -I. -W -Wall -DHAVE_PTHREAD_H
 PICFLAGS     = -fPIC
-LDFLAGS      =
+LDFLAGS      = -lpthread
 AR           = ar
 RANLIB       = ranlib
 LIB_FILE     = libucd.a
@@ -16,6 +16,11 @@ HOST_LIBS    =
 
 PERL         = time perl
 
+
+#
+# Headers included from libucd_int.h
+#
+HDRS = libucd_int.h ucd.h int24.h compiler.h
 
 #
 # These are the files produced by convert_ucd.pl
@@ -48,7 +53,7 @@ CVT_FILES = gen/jamo.c gen/nameslist.tab gen/nametoucs.keys gen/nametoucs.tab \
 LIBSRCS = proparray.c gen/nametoucs_hash.c gen/ucstoname_hash.c \
 	  gen/jamo.c gen/nameslist.c gen/nameslist_dict.c \
 	  gen/ucstoname_tab.c gen/nametoucs_tab.c nametoucs.c \
-	  ucslookup.c
+	  ucslookup.c cache.c
 
 LIBOBJS = $(patsubst %.c,%.o,$(LIBSRCS))
 SO_OBJS = $(patsubst %.c,%.lo,$(LIBSRCS))
@@ -126,23 +131,26 @@ endif
 
 # -----------------------------------------------------------------------
 
-proparray.o: proparray.c ucd.h libucd_int.h gen/proparray.c
-proparray.lo: proparray.c ucd.h libucd_int.h gen/proparray.c
+proparray.o: proparray.c ucd.h $(HDRS) gen/proparray.c
+proparray.lo: proparray.c ucd.h $(HDRS) gen/proparray.c
 
 mk_ucstoname_tab.ho: mk_ucstoname_tab.c gen/ucstoname_hash.h
 mk_nametoucs_tab.ho: mk_nametoucs_tab.c gen/nametoucs_hash.h
 
-gen/ucstoname_tab.o: gen/ucstoname_tab.c libucd_int.h
-gen/ucstoname_tab.lo: gen/ucstoname_tab.c libucd_int.h
+gen/ucstoname_tab.o: gen/ucstoname_tab.c $(HDRS)
+gen/ucstoname_tab.lo: gen/ucstoname_tab.c $(HDRS)
 
-gen/nametoucs_tab.o: gen/nametoucs_tab.c libucd_int.h
-gen/nametoucs_tab.lo: gen/nametoucs_tab.c libucd_int.h
+gen/nametoucs_tab.o: gen/nametoucs_tab.c $(HDRS)
+gen/nametoucs_tab.lo: gen/nametoucs_tab.c $(HDRS)
 
 gen/nameslist_dict.o: gen/nameslist_dict.c
 gen/nameslist_dict.lo: gen/nameslist_dict.c
 
-nametoucs.o: nametoucs.c libucd_int.h gen/nametoucs_hash.h
-nametoucs.lo: nametoucs.c libucd_int.h gen/nametoucs_hash.h
+nametoucs.o: nametoucs.c $(HDRS) gen/nametoucs_hash.h
+nametoucs.lo: nametoucs.c $(HDRS) gen/nametoucs_hash.h
 
-ucslookup.o: ucslookup.c libucd_int.h gen/ucstoname_hash.h
-ucslookup.lo: ucslookup.c libucd_int.h gen/ucstoname_hash.h
+ucslookup.o: ucslookup.c $(HDRS) gen/ucstoname_hash.h
+ucslookup.lo: ucslookup.c $(HDRS) gen/ucstoname_hash.h
+
+cache.o: cache.c $(HDRS)
+cache.lo: cache.c $(HDRS)

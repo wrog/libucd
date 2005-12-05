@@ -36,6 +36,12 @@
 
 #include <stdint.h>
 
+#define LIBUCD_THREAD_SUPPORT
+
+#ifdef LIBUCD_THREAD_SUPPORT
+# include <pthread.h>
+#endif
+
 enum unicode_bidi_class {
   UC_BIDI_AL,			/* Arabic_Letter */
   UC_BIDI_AN,			/* Arabic_Number */
@@ -540,13 +546,15 @@ enum unicode_block {
 #define UC_FL_BIDI_MIRRORED		UC_FLAG(35)
 
 struct unicode_character_data {
+  int32_t ucs;			/* Actual codepoint */
+  uint16_t size;		/* Size of this structure */
+  uint16_t alloc_size;		/* Allocation size */
   uint64_t fl;			/* Flags */
   const char *name;
   const char *bidi_mirroring_glyph;
   const char *uppercase_mapping;
   const char *lowercase_mapping;
   const char *titlecase_mapping;
-  int32_t ucs;			/* Actual codepoint */
   int32_t simple_uppercase;
   int32_t simple_lowercase;
   int32_t simple_titlecase;
@@ -572,5 +580,7 @@ struct unicode_character_data {
 };
 
 struct unicode_character_data *unicode_character_data(int32_t);
+struct unicode_character_data *unicode_character_get(struct unicode_character_data *);
+void unicode_character_put(struct unicode_character_data *);
 
 #endif /* UCD_H */

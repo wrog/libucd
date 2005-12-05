@@ -6,6 +6,9 @@
 #include <errno.h>
 #include "libucd_int.h"
 #include "gen/ucstoname_hash.h"
+#ifdef HAVE_PTHREAD_H
+# include <pthread.h>
+#endif
 
 /*
  * This returns the name for a specific UCS in a user-provided buffer,
@@ -98,11 +101,18 @@ alloc_copy_properties(const struct _libucd_property_array *prop,
 		      int32_t ucs, size_t namelen)
 {
   struct unicode_character_data *ucd;
+  struct libucd_private *pvt;
+  size_t size = sizeof(struct unicode_character_data)+
+    sizeof(struct libucd_private)+namelen+1;
 
-  ucd = malloc(sizeof(struct unicode_character_data)+namelen+1);
+
+  ucd = malloc(size);
   if ( !ucd )
     return NULL;
-  ucd->name = (char *)(ucd+1);
+  pvt = (struct libucd_private *)(ucd+1);
+  ucd->name = (char *)(pvt+1);
+  ucd->size = sizeof(struct unicode_character_data);
+  ucd->alloc_size = size;
 
   ucd->fl = prop->flags_block & UINT64_C(0xffffffffffff);
   ucd->bidi_mirroring_glyph = NULL; /* NYS */
@@ -138,6 +148,14 @@ alloc_copy_properties(const struct _libucd_property_array *prop,
   ucd->word_break = prop->word_break;
   ucd->line_break = prop->line_break;
 
+#if defined(HAVE_PTHREAD_H) && !defined(HAVE_ATOMIC_CTR)
+  if ( pthread_mutex_init(&pvt->mutex, NULL) ) {
+    free(ucd);
+    return NULL;
+  }
+#endif
+  pvt->usage_ctr = 2;		/* cache plus end user */
+
   return ucd;
 }
 
@@ -145,7 +163,7 @@ alloc_copy_properties(const struct _libucd_property_array *prop,
  * Standard entry point for the user
  */
 struct unicode_character_data *
-unicode_character_data(int32_t ucs)
+unicode_character_data_raw(int32_t ucs)
 {
   uint32_t hash;
   const struct _libucd_ucstoname_tab  *unt;
@@ -206,5 +224,3 @@ unicode_character_data(int32_t ucs)
 
   return ucd;
 }
-
-	

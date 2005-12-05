@@ -62,4 +62,19 @@ extern const struct _libucd_nametoucs_tab _libucd_nametoucs_tab[];
 extern const unsigned char _libucd_names_list[];
 extern const char * const _libucd_nameslist_dict[256];
 
+/* This is a private data structure included in each ucd object */
+#if defined(__i386__) || defined(__x86_64__)
+# define HAVE_ATOMIC_CTR
+#endif
+
+struct libucd_private {
+#if defined(HAVE_PTHREAD_H) && !defined(HAVE_ATOMIC_CTR)
+  pthread_mutex_t mutex;
+#endif
+  volatile unsigned int usage_ctr;
+};
+
+struct unicode_character_data *
+unicode_character_data_raw(int32_t ucs);
+
 #endif
