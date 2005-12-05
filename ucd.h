@@ -571,4 +571,6 @@ struct unicode_character_data {
   enum unicode_line_break		line_break;
 };
 
+struct unicode_character_data *unicode_character_data(int32_t);
+
 #endif /* UCD_H */

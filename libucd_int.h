@@ -12,6 +12,9 @@
 #include "int24.h"
 #include "compiler.h"
 
+#define UCS_CNT	0x110000
+#define UCS_MAX (UCS_CNT-1)
+
 extern const char _libucd_hangul_jamo_l[][4];
 extern const char _libucd_hangul_jamo_v[][4];
 extern const char _libucd_hangul_jamo_t[][4];
@@ -56,7 +59,7 @@ struct _libucd_nametoucs_tab {
 };
 extern const struct _libucd_nametoucs_tab _libucd_nametoucs_tab[];
 
-#define UCS_CNT	0x110000
-#define UCS_MAX (UCS_CNT-1)
+extern const unsigned char _libucd_names_list[];
+extern const char * const _libucd_nameslist_dict[256];
 
 #endif

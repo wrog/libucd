@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdlib.h>
+#include <stdio.h>		/* For snprintf() */
 #include <inttypes.h>
 #include <errno.h>
 #include "libucd_int.h"
@@ -16,8 +17,8 @@ libucd_mkname(char *buf, const unsigned char *nameslist_ptr)
 {
   const unsigned char *p = nameslist_ptr;
   char *q = buf;
-  uint8_t c;
-  char *pp, cc;
+  const char *pp;
+  char cc;
   int n = *p++;			/* Characters remaining */
 
   while ( n ) {
@@ -58,9 +59,9 @@ hangul_name(char *buf, size_t n, int32_t codepoint)
   T = SIndex % TCount;
   
   return snprintf(buf, n, "HANGUL SYLLABLE %s%s%s",
-		  libucd_hangul_jamo_l[L],
-		  libucd_hangul_jamo_v[V],
-		  libucd_hangul_jamo_t[T]);
+		  _libucd_hangul_jamo_l[L],
+		  _libucd_hangul_jamo_v[V],
+		  _libucd_hangul_jamo_t[T]);
 }
 
 /*
@@ -76,7 +77,7 @@ search_prop_array(int32_t ucs)
   h = _libucd_property_array_count-1;
 
   for (;;) {
-    m = (l+h) >> 2;
+    m = (l+h) >> 1;
     pa = &_libucd_property_array[m];
     if ( ucs >= pa[0].ucs ) {
       if ( ucs < pa[1].ucs )
@@ -151,7 +152,6 @@ unicode_character_data(int32_t ucs)
   const struct _libucd_property_array *prop;
   size_t namelen;
   struct unicode_character_data *ucd;
-  char *nameptr;
 
   if ( ucs < 0 || ucs > UCS_MAX ) {
     errno = EINVAL;
@@ -163,7 +163,7 @@ unicode_character_data(int32_t ucs)
   if ( hash >= PHASHNKEYS ) {
     unt = NULL;
   } else {
-    unt = _libucd_ucstoname_tab[hash];
+    unt = &_libucd_ucstoname_tab[hash];
     if ( getint24(unt->ucs) != ucs )
       unt = NULL;
   }
@@ -193,7 +193,7 @@ unicode_character_data(int32_t ucs)
       ucd = alloc_copy_properties(prop, ucs, namelen);
       if ( !ucd )
 	return NULL;
-      snprintf((char *)ucd->name, namelen+1, "CJK UNIFIED IDEOGRAPH-%04X", ucd);
+      snprintf((char *)ucd->name, namelen+1, "CJK UNIFIED IDEOGRAPH-%04X", ucs);
     } else {
       /* Unnamed character */
       namelen = -1;
