@@ -89,19 +89,19 @@ gen/nameslist_tab.c gen/nameslist.offset: gen/nameslist.compr
 gen/nameslist.c: gen/nameslist.compr bin2c.pl
 	$(PERL) bin2c.pl _libucd_names_list < $< > $@ || rm -f $@
 
-gen/mk_nametoucs_tab: mk_nametoucs_tab.ho gen/ucstoname_hash.ho
+gen/mk_ucstoname_tab: mk_ucstoname_tab.ho gen/ucstoname_hash.ho
 	$(HOST_CC) $(HOST_LDFLAGS) -o $@ $^ $(HOST_LIBS)
 
-gen/ucstoname_tab.c: gen/mk_nametoucs_tab \
+gen/ucstoname_tab.c: gen/mk_ucstoname_tab \
 		     gen/proparrayindex gen/nameslist.offset
-	gen/mk_nametoucs_tab
+	gen/mk_ucstoname_tab
 
 # -----------------------------------------------------------------------
 
 proparray.o: proparray.c ucd.h libucd_int.h gen/proparray.c
 proparray.lo: proparray.c ucd.h libucd_int.h gen/proparray.c
 
-mk_nametoucs_tab.ho: gen/ucstoname_hash.h
+mk_ucstoname_tab.ho: gen/ucstoname_hash.h
 
 gen/ucstoname_tab.o: gen/ucstoname_tab.c libucd_int.h
 gen/ucstoname_tab.lo: gen/ucstoname_tab.c libucd_int.h
