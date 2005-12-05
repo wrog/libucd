@@ -47,7 +47,7 @@ CVT_FILES = gen/jamo.c gen/nameslist.tab gen/nametoucs.keys gen/nametoucs.tab \
 
 LIBSRCS = proparray.c gen/nametoucs_hash.c gen/ucstoname_hash.c \
 	  gen/jamo.c gen/nameslist.c gen/nameslist_dict.c \
-	  gen/ucstoname_tab.c gen/nametoucs_tab.c
+	  gen/ucstoname_tab.c gen/nametoucs_tab.c nametoucs.c
 
 LIBOBJS = $(patsubst %.c,%.o,$(LIBSRCS))
 SO_OBJS = $(patsubst %.c,%.lo,$(LIBSRCS))
@@ -128,8 +128,8 @@ endif
 proparray.o: proparray.c ucd.h libucd_int.h gen/proparray.c
 proparray.lo: proparray.c ucd.h libucd_int.h gen/proparray.c
 
-mk_ucstoname_tab.ho: gen/ucstoname_hash.h
-mk_nametoucs_tab.ho: gen/nametoucs_hash.h
+mk_ucstoname_tab.ho: mk_ucstoname_tab.c gen/ucstoname_hash.h
+mk_nametoucs_tab.ho: mk_nametoucs_tab.c gen/nametoucs_hash.h
 
 gen/ucstoname_tab.o: gen/ucstoname_tab.c libucd_int.h
 gen/ucstoname_tab.lo: gen/ucstoname_tab.c libucd_int.h
@@ -139,3 +139,6 @@ gen/nametoucs_tab.lo: gen/nametoucs_tab.c libucd_int.h
 
 gen/nameslist_dict.o: gen/nameslist_dict.c
 gen/nameslist_dict.lo: gen/nameslist_dict.c
+
+nametoucs.o: nametoucs.c libucd_int.h gen/nametoucs_hash.h
+nametoucs.lo: nametoucs.c libucd_int.h gen/nametoucs_hash.h

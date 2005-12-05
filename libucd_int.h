@@ -10,6 +10,7 @@
 #include <stdlib.h>
 #include "ucd.h"
 #include "int24.h"
+#include "compiler.h"
 
 extern const char _libucd_hangul_jamo_l[][4];
 extern const char _libucd_hangul_jamo_v[][4];
@@ -39,16 +40,19 @@ struct _libucd_property_array {
   unsigned numeric_type         :2;
   unsigned bidi_class           :5;
   unsigned /* unused */         :1;
-};
+} ALIGNED(32);
+extern const struct _libucd_property_array _libucd_property_array[];
 
 struct _libucd_ucstoname_tab {
   int24    ucs;
   uint24   names_offset;
   uint16_t proparray_offset;
-};
+} ALIGNED(8);
+extern const struct _libucd_ucstoname_tab _libucd_ucstoname_tab[];
 
 struct _libucd_nametoucs_tab {
   int24	   ucs;
 };
+extern const struct _libucd_nametoucs_tab _libucd_nametoucs_tab[];
 
 #endif
