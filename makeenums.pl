@@ -8,6 +8,8 @@ sub close_frag($) {
     my($longname) = @_;
 
     print UCD_H "};\n\n";
+    print UCD_H "int unicode_property_\L${longname}\E_names(enum unicode_\L${longname}\E, const char **, const char **);\n\n";
+
     print FRAG "};\n";
     print FRAG <<EOF;
 
