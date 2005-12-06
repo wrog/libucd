@@ -31,7 +31,7 @@ struct _libucd_property_array {
   int24    simple_lowercase;
   int24    simple_titlecase;
   uint8_t  age;			/* (major << 3) + minor */
-  uint8_t  combining_class;
+  uint8_t  canonical_combining_class;
   unsigned sentence_break	:4;
   unsigned grapheme_cluster_break :4;
   unsigned word_break		:3;
@@ -76,5 +76,10 @@ struct libucd_private {
 
 struct unicode_character_data *
 unicode_character_data_raw(int32_t ucs);
+
+struct libucd_enum_names {
+  const char *long_name;
+  const char *short_name;
+};
 
 #endif

@@ -48,12 +48,17 @@ CVT_FILES = gen/jamo.c gen/nameslist.tab gen/nametoucs.keys gen/nametoucs.tab \
 .c.hi:
 	$(HOST_CC) $(HOST_CFLAGS) -E -o $@ $<
 
+enums/%.o: enums/%.c $(HDRS)
+	$(CC) $(CFLAGS) -c -o $@ $<
+enums/%.lo: enums/%.c $(HDRS)
+	$(CC) $(CFLAGS) $(PICFLAGS) -c -o $@ $<
+
 # -----------------------------------------------------------------------
 
 LIBSRCS = proparray.c gen/nametoucs_hash.c gen/ucstoname_hash.c \
 	  gen/jamo.c gen/nameslist.c gen/nameslist_dict.c \
 	  gen/ucstoname_tab.c gen/nametoucs_tab.c nametoucs.c \
-	  ucslookup.c cache.c
+	  ucslookup.c cache.c $(wildcard enums/*.c)
 
 LIBOBJS = $(patsubst %.c,%.o,$(LIBSRCS))
 SO_OBJS = $(patsubst %.c,%.lo,$(LIBSRCS))
@@ -63,7 +68,7 @@ SO_OBJS = $(patsubst %.c,%.lo,$(LIBSRCS))
 all : $(LIB_FILE) $(SO_FILE) $(SO_NAME)
 
 clean:
-	rm -rf gen
+	rm -rf gen enums
 	rm -f *.o *.i *.*.a *.so *.so.*
 	$(MAKE) -C perfect clean
 
@@ -128,6 +133,9 @@ ifneq ($(SO_NAME),$(SO_FILE))
 $(SO_NAME): $(SO_FILE)
 	ln -f $(SO_FILE) $(SO_NAME)
 endif
+
+ucd.h: ucd.h.in enum.list makeenums.pl
+	$(PERL) makeenums.pl
 
 # -----------------------------------------------------------------------
 

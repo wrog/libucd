@@ -141,7 +141,7 @@ alloc_copy_properties(const struct _libucd_property_array *prop,
   ucd->east_asian_width = prop->east_asian_width;
   ucd->hangul_syllable_type = prop->hangul_syllable_type;
   ucd->numeric_type = prop->numeric_type;
-  ucd->combining_class = prop->combining_class;
+  ucd->canonical_combining_class = prop->canonical_combining_class;
   ucd->bidi_class = prop->bidi_class;
   ucd->grapheme_cluster_break = prop->grapheme_cluster_break;
   ucd->sentence_break = prop->sentence_break;

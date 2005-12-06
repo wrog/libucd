@@ -397,8 +397,8 @@ sub make_properties_array()
 	$mine .= "\t\tUC_GC_$gc,\n";
 
 	# Script
-	my $scr = $$cp{'Script'} || 'Common';
-	$mine .= "\t\tUC_SCR_$scr,\n";
+	my $sc = $$cp{'Script'} || 'Common';
+	$mine .= "\t\tUC_SC_$sc,\n";
 
 	# Numeric value
 	my $nv = $$cp{'Numeric_Value'};
@@ -476,8 +476,8 @@ sub make_properties_array()
 	$mine .= "\t\tUC_JG_$ajg,\n";
 
 	# East Asian Width
-	my $eaw = $$cp{'East_Asian_Width'} || 'N';
-	$mine .= "\t\tUC_EAW_$eaw,\n";
+	my $ea = $$cp{'East_Asian_Width'} || 'N';
+	$mine .= "\t\tUC_EA_$ea,\n";
 
 	# Hangul Syllable Type
 	my $hst = $$cp{'Hangul_Syllable_Type'} || 'NA';
@@ -493,7 +493,7 @@ sub make_properties_array()
 
 	# Bidi Class
 	my $bc = $$cp{'Bidi_Class'} || 'L';
-	$mine .= "\t\tUC_BIDI_$bc,\n";
+	$mine .= "\t\tUC_BC_$bc,\n";
 
 	# Additional properties...
 	$mine .= "\t},\n";
