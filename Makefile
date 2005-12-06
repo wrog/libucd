@@ -137,6 +137,9 @@ endif
 ucd.h: ucd.h.in enum.list makeenums.pl
 	$(PERL) makeenums.pl
 
+gen/cache.c: gencache.pl
+	$(PERL) gencache.pl
+
 # -----------------------------------------------------------------------
 
 proparray.o: proparray.c ucd.h $(HDRS) gen/proparray.c
@@ -160,5 +163,5 @@ nametoucs.lo: nametoucs.c $(HDRS) gen/nametoucs_hash.h
 ucslookup.o: ucslookup.c $(HDRS) gen/ucstoname_hash.h
 ucslookup.lo: ucslookup.c $(HDRS) gen/ucstoname_hash.h
 
-cache.o: cache.c $(HDRS)
-cache.lo: cache.c $(HDRS)
+cache.o: cache.c gen/cache.c $(HDRS)
+cache.lo: cache.c gen/cache.c $(HDRS)

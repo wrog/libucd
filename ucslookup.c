@@ -160,10 +160,10 @@ alloc_copy_properties(const struct _libucd_property_array *prop,
 }
 
 /*
- * Standard entry point for the user
+ * Actual data-generating function
  */
-struct unicode_character_data *
-unicode_character_data_raw(int32_t ucs)
+const struct unicode_character_data *
+_libucd_character_data_raw(int32_t ucs)
 {
   uint32_t hash;
   const struct _libucd_ucstoname_tab  *unt;

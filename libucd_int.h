@@ -74,8 +74,8 @@ struct libucd_private {
   volatile unsigned int usage_ctr;
 };
 
-struct unicode_character_data *
-unicode_character_data_raw(int32_t ucs);
+const struct unicode_character_data *
+_libucd_character_data_raw(int32_t ucs);
 
 struct libucd_enum_names {
   const char *long_name;

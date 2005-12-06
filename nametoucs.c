@@ -38,11 +38,11 @@ static int32_t name_lookup(const char *name)
   return ucs;
 }
 
-struct unicode_character_data *
+const struct unicode_character_data *
 unicode_character_lookup(const char *name)
 {
   int32_t ucs = name_lookup(name);
-  struct unicode_character_data *ucd =
+  const struct unicode_character_data *ucd =
     unicode_character_data(ucs);
 
   if ( !ucd->name || strcmp(name, ucd->name) ) {

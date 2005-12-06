@@ -4,29 +4,26 @@
 # include <pthread.h>
 #endif
 
-#define CACHE_SIZE 512
-static struct unicode_character_data *_libucd_cache[CACHE_SIZE];
+#include "gen/cache.c"
 
 #ifdef HAVE_PTHREAD_H
-static pthread_mutex_t _libucd_cache_mutex = PTHREAD_MUTEX_INITIALIZER;
-
-static void lock_cache(void)
+static void lock_cache(struct cache_row *r)
 {
-  pthread_mutex_lock(&_libucd_cache_mutex);
+  pthread_mutex_lock(&r->mutex);
 }
-static void unlock_cache(void)
+static void unlock_cache(struct cache_row *r)
 {
-  pthread_mutex_unlock(&_libucd_cache_mutex);
+  pthread_mutex_unlock(&r->mutex);
 }
-
 #else
-
 /* Single-threaded execution only */
-static void lock_cache(void)
+static void lock_cache(struct cache_row *r)
 {
+  (void)r;
 }
-static void unlock_cache(void)
+static void unlock_cache(struct cache_row *r)
 {
+  (void)r;
 }
 #endif
 
@@ -34,8 +31,8 @@ static void unlock_cache(void)
 
 /* Specially optimized versions for i386 and x86-64 */
 
-struct unicode_character_data *
-unicode_character_get(struct unicode_character_data *ucd)
+const struct unicode_character_data *
+unicode_character_get(const struct unicode_character_data *ucd)
 {
   struct libucd_private *pvt = (struct libucd_private *)(ucd+1);
   asm volatile("lock ; incl %0" : "+m" (pvt->usage_ctr));
@@ -43,7 +40,7 @@ unicode_character_get(struct unicode_character_data *ucd)
 }
 
 void
-unicode_character_put(struct unicode_character_data *ucd)
+unicode_character_put(const struct unicode_character_data *ucd)
 {
   struct libucd_private *pvt = (struct libucd_private *)(ucd+1);
   unsigned char zero;
@@ -51,7 +48,7 @@ unicode_character_put(struct unicode_character_data *ucd)
   asm volatile("lock ; decl %0 ; setz %1"
 	       : "+m" (pvt->usage_ctr), "=r" (zero));
   if ( zero )
-    free(ucd);
+    free((void *)ucd);
 }
 
 #else
@@ -74,8 +71,8 @@ static void unlock(struct libucd_private *pvt)
 }
 # endif
 
-struct unicode_character_data *
-unicode_character_get(struct unicode_character_data *ucd)
+const struct unicode_character_data *
+unicode_character_get(const struct unicode_character_data *ucd)
 {
   struct libucd_private *pvt = (struct libucd_private *)(ucd+1);
   lock(pvt);
@@ -85,7 +82,7 @@ unicode_character_get(struct unicode_character_data *ucd)
 }
 
 void
-unicode_character_put(struct unicode_character_data *ucd)
+unicode_character_put(const struct unicode_character_data *ucd)
 {
   struct libucd_private *pvt = (struct libucd_private *)(ucd+1);
   unsigned int cnt;
@@ -98,35 +95,16 @@ unicode_character_put(struct unicode_character_data *ucd)
 
 #endif
 
-struct unicode_character_data *
+const struct unicode_character_data *
 unicode_character_data(int32_t ucs)
 {
-  struct unicode_character_data *ucd, *prev_ucd;
-  unsigned int bucket;
+  const struct unicode_character_data *ucd;
+  struct cache_row *row;
   
   if ( ucs < 0 || ucs > 0x10ffff )
     return NULL;
 
-  bucket = (uint32_t)ucs % CACHE_SIZE;
+  row = &libucd_cache[(uint32_t)ucs % CACHE_ROWS];
 
-  lock_cache();
-  ucd = _libucd_cache[bucket];
-  if ( ucd && ucd->ucs == ucs ) {
-    ucd = unicode_character_get(ucd);
-    unlock_cache();
-    return ucd;
-  }
-  unlock_cache();
-
-  ucd = unicode_character_data_raw(ucs);
-  
-  lock_cache();
-  prev_ucd = _libucd_cache[bucket];
-  _libucd_cache[bucket] = ucd;
-  unlock_cache();
-
-  if ( prev_ucd )
-    unicode_character_put(prev_ucd);
-  
-  return ucd;
+  RETURN_ENTRY(ucs, row);
 }
