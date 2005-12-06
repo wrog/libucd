@@ -8,15 +8,15 @@ sub close_frag($) {
     my($longname) = @_;
 
     print UCD_H "};\n\n";
-    print UCD_H "int unicode_property_\L${longname}\E_names(enum unicode_\L${longname}\E, const char **, const char **);\n\n";
+    print UCD_H "int unicode_property_names_\L${longname}\E(enum unicode_\L${longname}\E, const char **, const char **);\n\n";
 
     print FRAG "};\n";
     print FRAG <<EOF;
 
 int
-unicode_property_\L${longname}\E_names(enum unicode_\L${longname}\E v,
-				      const char **longname,
-				      const char **shortname)
+unicode_property_names_\L${longname}\E(enum unicode_\L${longname}\E v,
+				       const char **longname,
+				       const char **shortname)
 {
     const char *ln, *sn;
     int rv;
