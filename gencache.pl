@@ -61,15 +61,19 @@ for ( $i = 0 ; $i < $associativity ; $i++ ) {
 
 print GEN "\tunlock_cache(r); \\\n";
 print GEN "\tucd = _libucd_character_data_raw(u); \\\n";
-print GEN "\tlock_cache(r); \\\n";
-print GEN "\tif ( r->e[$maxent].ucd ) \\\n";
-print GEN "\t\tunicode_character_put(r->e[$maxent].ucd); \\\n";
+print GEN "\t{ \\\n";
+print GEN "\t\tconst struct unicode_character_data *olducd; \\\n";
+print GEN "\t\tlock_cache(r); \\\n";
+print GEN "\t\tolducd = r->e[$maxent].ucd; \\\n";
 for ( $j = $maxent ; $j > 0 ; $j-- ) {
     $jm1 = $j-1;
-    print GEN "\tr->e[$j] = r->e[$jm1]; \\\n";
+    print GEN "\t\tr->e[$j] = r->e[$jm1]; \\\n";
 }
-print GEN "\tr->e[0].ucs = u; r->e[0].ucd = ucd; \\\n";
-print GEN "\tunlock_cache(r); \\\n";
+print GEN "\t\tr->e[0].ucs = u; r->e[0].ucd = ucd; \\\n";
+print GEN "\t\tunlock_cache(r); \\\n";
+print GEN "\t\tif (olducd) \\\n";
+print GEN "\t\t\tunicode_character_put(olducd); \\\n";
+print GEN "\t} \\\n";
 print GEN "\treturn ucd; \\\n";
 print GEN "\n";
 
