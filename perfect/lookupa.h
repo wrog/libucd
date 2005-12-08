@@ -18,7 +18,7 @@ Source is http://burtleburtle.net/bob/c/lookupa.h
 #define hashsize(n) ((uint32_t)1<<(n))
 #define hashmask(n) (hashsize(n)-1)
 
-uint32_t  lookup(/*_ ub1 *k, uint32_t length, uint32_t level _*/);
-void checksum(/*_ ub1 *k, uint32_t length, uint32_t *state _*/);
+uint32_t  lookup(register uint8_t *k, register uint32_t length, register uint32_t level);
+void checksum(register uint8_t *k, register uint32_t len, register uint32_t *state);
 
 #endif /* LOOKUPA */

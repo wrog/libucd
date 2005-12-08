@@ -118,15 +118,12 @@ struct qstuff
 typedef  struct qstuff  qstuff;
 
 /* return ceiling(log based 2 of x) */
-uint32_t ilog2(/*_ uint32_t x _*/);
+uint32_t ilog2(uint32_t val);
 
 /* Given the keys, scramble[], and hash mode, find the perfect hash */
-void findhash(/*_ bstuff **tabb, uint32_t *alen, uint32_t *blen, uint32_t *salt,
-		gencode *final, uint32_t *scramble, uint32_t smax, key *keys, uint32_t nkeys, 
-		hashform *form _*/);
+void findhash(bstuff **tabb, uint32_t *alen, uint32_t *blen, uint32_t *salt, gencode *final, uint32_t *scramble, uint32_t *smax, key *keys, uint32_t nkeys, hashform *form);
 
 /* private, but in a different file because it's excessively verbose */
-int inithex(/*_ key *keys, uint32_t *alen, uint32_t *blen, uint32_t smax, uint32_t nkeys, 
-	      uint32_t salt, gencode *final, gencode *form _*/);
+int inithex(key *keys, uint32_t nkeys, uint32_t alen, uint32_t blen, uint32_t smax, uint32_t salt, gencode *final, hashform *form);
 
 #endif /* PERFECT */
