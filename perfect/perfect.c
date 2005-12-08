@@ -135,17 +135,17 @@ hashform *form;
   case INT_HT:
     if (key1->hash_k == key2->hash_k)
     {
-      fprintf(stderr, "perfect.c: Duplicate keys!  %.8lx\n", key1->hash_k);
+      fprintf(stderr, "perfect.c: Duplicate keys!  %.8"PRIx32"\n", key1->hash_k);
       exit(SUCCESS);
     }
     break;
   case AB_HT:
-    fprintf(stderr, "perfect.c: Duplicate keys!  %.8lx %.8lx\n",
+    fprintf(stderr, "perfect.c: Duplicate keys!  %.8"PRIx32" %.8"PRIx32"\n",
 	    key1->a_k, key1->b_k);
     exit(SUCCESS);
     break;
   default:
-    fprintf(stderr, "perfect.c: Illegal hash type %ld\n", (uint32_t)form->hashtype);
+    fprintf(stderr, "perfect.c: Illegal hash type %"PRId32"\n", (uint32_t)form->hashtype);
     exit(SUCCESS);
     break;
   }
@@ -221,7 +221,7 @@ gencode  *final;                          /* output, code for the final hash */
     sprintf(final->line[0], 
 	    "  uint32_t i,state[CHECKSTATE],rsl;\n");
     sprintf(final->line[1], 
-	    "  for (i=0; i<CHECKSTATE; ++i) state[i]=0x%lx;\n",initlev);
+	    "  for (i=0; i<CHECKSTATE; ++i) state[i]=0x%"PRIx32";\n",initlev);
     sprintf(final->line[2],
 	    "  checksum(key, len, state);\n");
     sprintf(final->line[3], 
@@ -241,19 +241,19 @@ gencode  *final;                          /* output, code for the final hash */
     }
     final->used = 2;
     sprintf(final->line[0], 
-	    "  uint32_t rsl, val = lookup(key, len, 0x%lx);\n", initlev);
+	    "  uint32_t rsl, val = lookup(key, len, 0x%"PRIx32");\n", initlev);
     if (smax <= 1)
     {
       sprintf(final->line[1], "  rsl = 0;\n");
     }
     else if (blen < USE_SCRAMBLE)
     {
-      sprintf(final->line[1], "  rsl = ((val>>%ld)^tab[val&0x%x]);\n",
+      sprintf(final->line[1], "  rsl = ((val>>%"PRId32")^tab[val&0x%x]);\n",
 	      32-ilog2(alen), blen-1);
     }
     else
     {
-      sprintf(final->line[1], "  rsl = ((val>>%ld)^scramble[tab[val&0x%x]]);\n",
+      sprintf(final->line[1], "  rsl = ((val>>%"PRId32")^scramble[tab[val&0x%x]]);\n",
 	      32-ilog2(alen), blen-1);
     }
   }
@@ -295,12 +295,12 @@ gencode  *final;                            /* generated code for final hash */
   }
   else if (blen < USE_SCRAMBLE)
   {
-    sprintf(final->line[0], "  uint32_t rsl = ((val & 0x%lx) ^ tab[val >> %ld]);\n",
+    sprintf(final->line[0], "  uint32_t rsl = ((val & 0x%"PRIx32") ^ tab[val >> %"PRId32"]);\n",
 	    amask, 32-blog);
   }
   else
   {
-    sprintf(final->line[0], "  uint32_t rsl = ((val & 0x%lx) ^ scramble[tab[val >> %ld]]);\n",
+    sprintf(final->line[0], "  uint32_t rsl = ((val & 0x%"PRIx32") ^ scramble[tab[val >> %"PRId32"]]);\n",
 	    amask, 32-blog);
   }
 }
@@ -425,7 +425,7 @@ int     rollback;          /* FALSE applies augmenting path, TRUE rolls back */
       else if (tabh[hash].key_h)
       {
 	/* very rare: roll back any changes */
-	(void *)apply(tabb, tabh, tabq, blen, scramble, tail, TRUE);
+	(void)apply(tabb, tabh, tabq, blen, scramble, tail, TRUE);
 	return FALSE;                                  /* failure, collision */
       }
       tabh[hash].key_h = mykey;
@@ -569,7 +569,7 @@ hashform *form;
 	if (!augment(tabb, tabh, tabq, blen, scramble, smax, &tabb[i], nkeys, 
 		     i+1, form))
 	{
-	  printf("fail to map group of size %ld for tab size %ld\n", j, blen);
+	  printf("fail to map group of size %"PRId32" for tab size %"PRId32"\n", j, blen);
 	  return FALSE;
 	}
 
@@ -916,7 +916,7 @@ hashform *form;                                           /* user directives */
       continue;                             /* two keys have same (a,b) pair */
     }
 
-    printf("found distinct (A,B) on attempt %ld\n", trysalt);
+    printf("found distinct (A,B) on attempt %"PRId32"\n", trysalt);
 
     /* Given distinct (A,B) for all keys, build a perfect hash */
     if (!perfect(*tabb, tabh, tabq, *blen, *smax, scramble, nkeys, form))
@@ -949,7 +949,7 @@ hashform *form;                                           /* user directives */
     break;
   }
 
-  printf("built perfect hash table of size %ld\n", *blen);
+  printf("built perfect hash table of size %"PRId32"\n", *blen);
 
   /* free working memory */
   free((void *)tabh);
@@ -980,19 +980,19 @@ hashform  *form;                                          /* user directives */
     mykey = (key *)renew(keyroot);
     if (form->mode == AB_HM)
     {
-      sscanf(mytext, "%lx %lx ", &mykey->a_k, &mykey->b_k);
+      sscanf(mytext, "%"PRIx32" %"PRIx32" ", &mykey->a_k, &mykey->b_k);
     }
     else if (form->mode == ABDEC_HM)
     {
-      sscanf(mytext, "%ld %ld ", &mykey->a_k, &mykey->b_k);
+      sscanf(mytext, "%"PRId32" %"PRId32" ", &mykey->a_k, &mykey->b_k);
     }
     else if (form->mode == HEX_HM)
     {
-      sscanf(mytext, "%lx ", &mykey->hash_k);
+      sscanf(mytext, "%"PRIx32" ", &mykey->hash_k);
     }
     else if (form->mode == DECIMAL_HM)
     {
-      sscanf(mytext, "%ld ", &mykey->hash_k);
+      sscanf(mytext, "%"PRId32" ", &mykey->hash_k);
     }
     else
     {
@@ -1019,7 +1019,7 @@ hashform *form;
   char *guard_token, *q;
   const char *p;
 
-  guard_token = alloca(strlen(header_name));
+  guard_token = alloca(strlen(header_name)+1);
   p = header_name; q = guard_token;
   while ( *p ) {
     if ( isalnum(*p) ) {
@@ -1029,6 +1029,7 @@ hashform *form;
     }
     p++;
   }
+  *q = '\0';
 
   f = fopen(header_name, "w");
   fprintf(f, "#ifndef %s\n", guard_token);
@@ -1051,16 +1052,16 @@ hashform *form;
 	  fprintf(f, "extern uint32_t scramble[];\n");
       }
     }
-    fprintf(f, "#define PHASHLEN 0x%lx  /* length of hash mapping table */\n",
+    fprintf(f, "#define PHASHLEN 0x%"PRIx32"  /* length of hash mapping table */\n",
 	    blen);
   }
 #endif
 
-  fprintf(f, "#define PHASHNKEYS %ld  /* How many keys were hashed */\n",
+  fprintf(f, "#define PHASHNKEYS %"PRId32"  /* How many keys were hashed */\n",
           nkeys);
-  fprintf(f, "#define PHASHRANGE %ld  /* Range any input might map to */\n",
+  fprintf(f, "#define PHASHRANGE %"PRId32"  /* Range any input might map to */\n",
           smax);
-  fprintf(f, "#define PHASHSALT 0x%.8lx /* internal, initialize normal hash */\n",
+  fprintf(f, "#define PHASHSALT 0x%.8"PRIx32" /* internal, initialize normal hash */\n",
           salt*0x9e3779b9);
   fprintf(f, "\n");
   switch(form->mode)
@@ -1106,7 +1107,7 @@ hashform *form;                                           /* user directives */
     {
       fprintf(f, "static const uint32_t scramble[] = {\n");
       for (i=0; i<=UINT8_MAX; i+=4)
-        fprintf(f, "0x%.8lx, 0x%.8lx, 0x%.8lx, 0x%.8lx,\n",
+        fprintf(f, "0x%.8"PRIx32", 0x%.8"PRIx32", 0x%.8"PRIx32", 0x%.8"PRIx32",\n",
                 scramble[i+0], scramble[i+1], scramble[i+2], scramble[i+3]);
     }
     else
@@ -1114,7 +1115,7 @@ hashform *form;                                           /* user directives */
       fprintf(f, "static const uint16_t scramble[] = {\n");
       for (i=0; i<=UINT8_MAX; i+=8)
         fprintf(f, 
-"0x%.4lx, 0x%.4lx, 0x%.4lx, 0x%.4lx, 0x%.4lx, 0x%.4lx, 0x%.4lx, 0x%.4lx,\n",
+"0x%.4"PRIx32", 0x%.4"PRIx32", 0x%.4"PRIx32", 0x%.4"PRIx32", 0x%.4"PRIx32", 0x%.4"PRIx32", 0x%.4"PRIx32", 0x%.4"PRIx32",\n",
                 scramble[i+0], scramble[i+1], scramble[i+2], scramble[i+3],
                 scramble[i+4], scramble[i+5], scramble[i+6], scramble[i+7]);
     }
@@ -1137,7 +1138,7 @@ hashform *form;                                           /* user directives */
     else if (blen <= 1024)
     {
       for (i=0; i<blen; i+=16)
-	fprintf(f, "%ld,%ld,%ld,%ld,%ld,%ld,%ld,%ld,%ld,%ld,%ld,%ld,%ld,%ld,%ld,%ld,\n",
+	fprintf(f, "%"PRId32",%"PRId32",%"PRId32",%"PRId32",%"PRId32",%"PRId32",%"PRId32",%"PRId32",%"PRId32",%"PRId32",%"PRId32",%"PRId32",%"PRId32",%"PRId32",%"PRId32",%"PRId32",\n",
 		scramble[tab[i+0].val_b], scramble[tab[i+1].val_b], 
 		scramble[tab[i+2].val_b], scramble[tab[i+3].val_b], 
 		scramble[tab[i+4].val_b], scramble[tab[i+5].val_b], 
@@ -1150,7 +1151,7 @@ hashform *form;                                           /* user directives */
     else if (blen < USE_SCRAMBLE)
     {
       for (i=0; i<blen; i+=8)
-	fprintf(f, "%ld,%ld,%ld,%ld,%ld,%ld,%ld,%ld,\n",
+	fprintf(f, "%"PRId32",%"PRId32",%"PRId32",%"PRId32",%"PRId32",%"PRId32",%"PRId32",%"PRId32",\n",
 		scramble[tab[i+0].val_b], scramble[tab[i+1].val_b], 
 		scramble[tab[i+2].val_b], scramble[tab[i+3].val_b], 
 		scramble[tab[i+4].val_b], scramble[tab[i+5].val_b], 
@@ -1159,7 +1160,7 @@ hashform *form;                                           /* user directives */
     else 
     {
       for (i=0; i<blen; i+=16)
-	fprintf(f, "%ld,%ld,%ld,%ld,%ld,%ld,%ld,%ld,%ld,%ld,%ld,%ld,%ld,%ld,%ld,%ld,\n",
+	fprintf(f, "%"PRId32",%"PRId32",%"PRId32",%"PRId32",%"PRId32",%"PRId32",%"PRId32",%"PRId32",%"PRId32",%"PRId32",%"PRId32",%"PRId32",%"PRId32",%"PRId32",%"PRId32",%"PRId32",\n",
 		tab[i+0].val_b, tab[i+1].val_b, 
  		tab[i+2].val_b, tab[i+3].val_b, 
 		tab[i+4].val_b, tab[i+5].val_b, 
@@ -1232,7 +1233,7 @@ hashform *form;                                           /* user directives */
 
   /* read in the list of keywords */
   getkeys(&keys, &nkeys, textroot, keyroot, form);
-  printf("Read in %ld keys\n",nkeys);
+  printf("Read in %"PRId32" keys\n",nkeys);
 
   /* find the hash */
   findhash(&tab, &alen, &blen, &salt, &final, 
