@@ -1,7 +1,4 @@
-HOST_CC      = cc
-HOST_CFLAGS  = -g -O
-HOST_LDFLAGS =
-HOST_LIBS   += -lm
+include ../MCONFIG
 
 .c.o:
 	$(HOST_CC) $(HOST_CFLAGS) -c $<

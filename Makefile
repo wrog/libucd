@@ -1,21 +1,4 @@
-CC	     = cc
-CFLAGS	     = -g -O3 -I. -W -Wall -DHAVE_PTHREAD_H
-PICFLAGS     = -fPIC
-LDFLAGS      = -lpthread
-AR           = ar
-RANLIB       = ranlib
-LIB_FILE     = libucd.a
-SO_FILE      = libucd.so
-SO_NAME      = libucd.so.0
-SOFLAGS      = -shared -Wl,-soname,$(SO_NAME)
-
-HOST_CC      = cc
-HOST_CFLAGS  = -g -O -I. -W -Wall
-HOST_LDFLAGS =
-HOST_LIBS    =
-
-PERL         = time perl
-
+include MCONFIG
 
 #
 # Headers included from libucd_int.h
