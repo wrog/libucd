@@ -41,7 +41,7 @@ enums/%.lo: enums/%.c $(HDRS)
 LIBSRCS = proparray.c gen/nametoucs_hash.c gen/ucstoname_hash.c \
 	  gen/jamo.c gen/nameslist.c gen/nameslist_dict.c \
 	  gen/ucstoname_tab.c gen/nametoucs_tab.c nametoucs.c \
-	  ucslookup.c cache.c $(wildcard enums/*.c)
+	  ucslookup.c cache.c gen/ucdversion.c $(wildcard enums/*.c)
 
 LIBOBJS = $(patsubst %.c,%.o,$(LIBSRCS))
 SO_OBJS = $(patsubst %.c,%.lo,$(LIBSRCS))
@@ -103,6 +103,8 @@ gen/mk_nametoucs_tab: mk_nametoucs_tab.ho gen/nametoucs_hash.ho
 gen/nametoucs_tab.c: gen/mk_nametoucs_tab gen/nametoucs.tab
 	gen/mk_nametoucs_tab
 
+gen/ucdversion.c: ucd/version ucdversion.pl
+	$(PERL) ucdversion.pl
 
 $(LIB_FILE): $(LIBOBJS)
 	rm -f $(LIB_FILE)
