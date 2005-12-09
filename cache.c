@@ -102,7 +102,7 @@ unicode_character_data(int32_t ucs)
   const struct unicode_character_data *ucd;
   struct cache_row *row;
   
-  if ( (uint32_t)ucs > UCS_MAX ) {
+  if ( unlikely((uint32_t)ucs > UCS_MAX) ) {
     errno = EINVAL;
     return NULL;
   }

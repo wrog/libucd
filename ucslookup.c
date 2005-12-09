@@ -160,7 +160,8 @@ alloc_copy_properties(const struct _libucd_property_array *prop,
 }
 
 /*
- * Actual data-generating function
+ * Actual data-generating function.  ucs is required to be
+ * in the valid range [0..UCS_MAX].
  */
 const struct unicode_character_data *
 _libucd_character_data_raw(int32_t ucs)
@@ -170,11 +171,6 @@ _libucd_character_data_raw(int32_t ucs)
   const struct _libucd_property_array *prop;
   size_t namelen;
   struct unicode_character_data *ucd;
-
-  if ( (uint32_t)ucs > UCS_MAX ) {
-    errno = EINVAL;
-    return NULL;		/* Invalid UCS value */
-  }
 
   hash = _libucd_ucstoname_hash(ucs);
 
