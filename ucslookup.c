@@ -171,7 +171,7 @@ _libucd_character_data_raw(int32_t ucs)
   size_t namelen;
   struct unicode_character_data *ucd;
 
-  if ( ucs < 0 || ucs > UCS_MAX ) {
+  if ( (uint32_t)ucs > UCS_MAX ) {
     errno = EINVAL;
     return NULL;		/* Invalid UCS value */
   }

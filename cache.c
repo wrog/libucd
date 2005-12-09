@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <errno.h>
 #include "libucd_int.h"
 #ifdef HAVE_PTHREAD_H
 # include <pthread.h>
@@ -101,8 +102,10 @@ unicode_character_data(int32_t ucs)
   const struct unicode_character_data *ucd;
   struct cache_row *row;
   
-  if ( ucs < 0 || ucs > 0x10ffff )
+  if ( (uint32_t)ucs > UCS_MAX ) {
+    errno = EINVAL;
     return NULL;
+  }
 
   row = &libucd_cache[(uint32_t)ucs % CACHE_ROWS];
 
