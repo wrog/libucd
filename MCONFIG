@@ -23,3 +23,4 @@ INSTALL_DATA = $(INSTALL) -m 644
 prefix	     = /usr/local
 libdir	     = $(prefix)/lib
 mandir	     = $(prefix)/man
+includedir   = $(prefix)/include

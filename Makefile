@@ -61,8 +61,8 @@ distclean: clean
 install: all
 	mkdir -p $(INSTALLROOT)$(libdir)
 	$(INSTALL_LIB) $(LIB_FILE) $(SO_FILE) $(SO_NAME) $(INSTALLROOT)$(libdir)
-	mkdir -p $(INSTALLROOT)$(installdir)
-	$(INSTALL_DATA) ucd.h $(INSTALLROOT)$(installdir)
+	mkdir -p $(INSTALLROOT)$(includedir)
+	$(INSTALL_DATA) ucd.h $(INSTALLROOT)$(includedir)
 	mkdir -p $(INSTALLROOT)$(mandir)/man3
 	$(INSTALL_DATA) *.3 $(INSTALLROOT)$(mandir)/man3
 
