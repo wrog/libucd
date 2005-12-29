@@ -1,0 +1,106 @@
+.\" -----------------------------------------------------------------------
+.\"   
+.\"   Copyright 2005 H. Peter Anvin - All Rights Reserved
+.\"
+.\"   Permission is hereby granted, free of charge, to any person
+.\"   obtaining a copy of this software and associated documentation
+.\"   files (the "Software"), to deal in the Software without
+.\"   restriction, including without limitation the rights to use,
+.\"   copy, modify, merge, publish, distribute, sublicense, and/or
+.\"   sell copies of the Software, and to permit persons to whom
+.\"   the Software is furnished to do so, subject to the following
+.\"   conditions:
+.\"   
+.\"   The above copyright notice and this permission notice shall
+.\"   be included in all copies or substantial portions of the Software.
+.\"   
+.\"   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+.\"   EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+.\"   OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+.\"   NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+.\"   HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+.\"   WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+.\"   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+.\"   OTHER DEALINGS IN THE SOFTWARE.
+.\"
+.\" -----------------------------------------------------------------------
+.TH LIBUCD 3 2005-12-29 libucd ""
+.SH NAME
+unicode_character_data, unicode_character_lookup, unicode_character_get,
+unicode_character_put, unicode_database_version \-
+query the Unicode Character Database
+.SH SYNOPSIS
+.nf
+.B #include <ucd.h>
+.sp
+.B const struct unicode_character_data *unicode_character_data(int32_t);
+.sp
+.B const struct unicode_character_data *unicode_character_lookup(const char *);
+.sp
+.B const struct unicode_character_data *unicode_character_get(const struct unicode_character_data *);
+.sp
+.B void unicode_character_put(const struct unicode_character_data *);
+.sp
+.B uint32_t unicode_database_version();
+.fi
+.SH DESCRIPTION
+These functions query the Unicode Character Database for attribute
+information about a certain character.  Attribute information is
+represented by a pointer to a reference-counted structure.  Any
+internal pointers in the structure should be assumed to point to
+memory protected by the same reference count.
+.PP
+\fBunicode_character_data()\fP returns the attributes for a character
+specified by Unicode index.  If the argument is outside the Unicode
+range (0 to 0x10ffff) it returns NULL with \fIerrno\fP set to EINVAL.
+.PP
+\fBunicode_character_lookup()\fP searches for a character by Unicode
+name (e.g. "LATIN CAPITAL LETTER A".)  If no character by that name is
+known, it returns NULL with \fIerrno\fP set to EINVAL.  Only exact
+matches are returned; if a case-insensitive matching is desired, the
+string should be upper-cased.
+.PP
+\fBunicode_character_get()\fP creates a new reference to an attribute
+structure, and returns the new reference.  This pointer may or may not
+be a pointer to the original structure.
+.PP
+\fBunicode_character_put()\fP unreferences an attribute structure and
+frees it if appropriate.
+.PP
+\fBunicode_character_version()\fP returns the version of the Unicode
+database from which the library was generated, in the format
+(major << 16)+(minor << 8)+(subminor).
+.PP
+The \fIunicode_character_data\fP structure is defined in <ucd.h> and
+contains at least the following fields:
+.sp
+.RS
+.nf
+.ne 6
+.ta 8n 16n 32n
+struct servent {
+        char    *s_name;                /* official service name */
+        char    **s_aliases;            /* alias list */
+        int     s_port;                 /* port number */
+        char    *s_proto;               /* protocol to use */
+}
+.ta
+.fi
+.RE
+.PP
+The members of the \fIunicode_character_data\fP structure are:
+.\" .TP
+
+.SH "RETURN VALUE"
+\fBunicode_character_data()\fP, \fBunicode_character_lookup()\fP, or
+\fBunicode_character_get()\fP return an attribute structure pointer on
+success, or NULL on failure.  In the case of failure, \fIerrno\fP is
+set to the appropriate error value (in the current implementation,
+either EINVAL or ENOMEM.)
+.PP
+\fBunicode_database_version()\fP returns the version of the underlying
+Unicode database, in the format (major << 16)+(minor << 8)+(subminor).
+.SH "BUGS"
+The fields related to non-trivial case mappings are not yet populated.
+
+
