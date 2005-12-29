@@ -121,6 +121,6 @@ const struct unicode_character_data *unicode_character_data(int32_t);
 const struct unicode_character_data *unicode_character_get(const struct unicode_character_data *);
 void unicode_character_put(const struct unicode_character_data *);
 const struct unicode_character_data *unicode_character_lookup(const char *);
-extern const int unicode_database_version[3];
+int unicode_database_version(void);
 
 #endif /* UCD_H */
