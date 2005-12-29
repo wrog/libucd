@@ -34,7 +34,7 @@ reroot *remkroot(size_t size)
 void  refree(struct reroot *r)
 {
    recycle *temp;
-   if (temp = r->list) while (r->list)
+   if ( (temp = r->list) ) while (r->list)
    {
       temp = r->list->next;
       free((char *)r->list);
@@ -73,8 +73,7 @@ char   *remalloc(size_t len, char *purpose)
   char *x = (char *)malloc(len);
   if (!x)
   {
-    fprintf(stderr, "malloc of %d failed for %s\n", 
-	    len, purpose);
+    fprintf(stderr, "malloc of %zu failed for %s\n", len, purpose);
     exit(SUCCESS);
   }
   return x;

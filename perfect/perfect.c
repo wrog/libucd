@@ -51,6 +51,7 @@ determined a perfect hash for the whole set of keys.
 #include "recycle.h"
 #include "perfect.h"
 #include <alloca.h>
+#include <ctype.h>
 
 /*
  * Configurable parameters
@@ -998,6 +999,8 @@ static void make_h(uint32_t blen, uint32_t smax, uint32_t nkeys, uint32_t salt, 
   FILE *f;
   char *guard_token, *q;
   const char *p;
+
+  (void)blen;			/* Not used */
 
   guard_token = alloca(strlen(header_name)+1);
   p = header_name; q = guard_token;
