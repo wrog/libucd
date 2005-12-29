@@ -48,7 +48,7 @@ SO_OBJS = $(patsubst %.c,%.lo,$(LIBSRCS))
 
 # -----------------------------------------------------------------------
 
-all : $(LIB_FILE) $(SO_FILE) $(SO_NAME)
+all : $(LIB_FILE) $(SO_FILE) $(SO_NAME) ucd.h
 
 clean:
 	rm -rf gen enums
@@ -56,9 +56,12 @@ clean:
 	$(MAKE) -C perfect clean
 
 install: all
-	mkdir -p $(INSTALLROOT)$(libdir) $(INSTALLROOT)$(mandir)/man3
-	$(INSTALL_LIB) $(LIB_FILE) $(SO_FILE) $(SO_NAME) $(libdir)
-	$(INSTALL_DATA) *.3 $(mandir)/man3
+	mkdir -p $(INSTALLROOT)$(libdir)
+	$(INSTALL_LIB) $(LIB_FILE) $(SO_FILE) $(SO_NAME) $(INSTALLROOT)$(libdir)
+	mkdir -p $(INSTALLROOT)$(installdir)
+	$(INSTALL_DATA) ucd.h $(INSTALLROOT)$(installdir)
+	mkdir -p $(INSTALLROOT)$(mandir)/man3
+	$(INSTALL_DATA) *.3 $(INSTALLROOT)$(mandir)/man3
 
 # -----------------------------------------------------------------------
 
