@@ -55,6 +55,11 @@ clean:
 	rm -f *.o *.ho *.lo *.i *.*.a *.so *.so.* ucd.h
 	$(MAKE) -C perfect clean
 
+install: all
+	mkdir -p $(INSTALLROOT)$(libdir) $(INSTALLROOT)$(mandir)/man3
+	$(INSTALL_LIB) $(LIB_FILE) $(SO_FILE) $(SO_NAME) $(libdir)
+	$(INSTALL_DATA) *.3 $(mandir)/man3
+
 # -----------------------------------------------------------------------
 
 $(CVT_FILES) : gen/done

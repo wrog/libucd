@@ -15,3 +15,11 @@ HOST_LDFLAGS =
 HOST_LIBS    =
 
 PERL         = time perl
+
+INSTALL	     = install -c
+INSTALL_LIB  = $(INSTALL) -m 755
+INSTALL_DATA = $(INSTALL) -m 644
+
+prefix	     = /usr/local
+libdir	     = $(prefix)/lib
+mandir	     = $(prefix)/man
