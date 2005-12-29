@@ -52,7 +52,7 @@ all : $(LIB_FILE) $(SO_FILE) $(SO_NAME)
 
 clean:
 	rm -rf gen enums
-	rm -f *.o *.ho *.lo *.i *.*.a *.so *.so.*
+	rm -f *.o *.ho *.lo *.i *.*.a *.so *.so.* ucd.h
 	$(MAKE) -C perfect clean
 
 # -----------------------------------------------------------------------
