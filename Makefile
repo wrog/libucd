@@ -161,3 +161,6 @@ ucslookup.lo: ucslookup.c $(HDRS) gen/ucstoname_hash.h
 
 cache.o: cache.c gen/cache.c $(HDRS)
 cache.lo: cache.c gen/cache.c $(HDRS)
+
+gen/ucdversion.o: gen/ucdversion.c $(HDRS)
+gen/ucdversion.lo: gen/ucdversion.c $(HDRS)
