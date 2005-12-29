@@ -52,8 +52,11 @@ all : $(LIB_FILE) $(SO_FILE) $(SO_NAME) ucd.h
 
 clean:
 	rm -rf gen enums
-	rm -f *.o *.ho *.lo *.i *.*.a *.so *.so.* ucd.h
+	rm -f *.o *.ho *.lo *.i *.s *.a *.so *.so.* ucd.h
 	$(MAKE) -C perfect clean
+
+distclean: clean
+	find . -name \*~ -print0 | xargs -0rt rm -f
 
 install: all
 	mkdir -p $(INSTALLROOT)$(libdir)
