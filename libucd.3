@@ -76,21 +76,90 @@ contains at least the following fields:
 .sp
 .RS
 .nf
-.ne 6
-.ta 8n 16n 32n
-struct servent {
-        char    *s_name;                /* official service name */
-        char    **s_aliases;            /* alias list */
-        int     s_port;                 /* port number */
-        char    *s_proto;               /* protocol to use */
-}
+.ne 4
+.ta 0n 4n 44n
+struct unicode_character_data {
+	int32_t					ucs;
+	uint16_t				size;
+	uint64_t				fl;
+	const char				*name;
+	int32_t					simple_uppercase;
+	int32_t					simple_lowercase;
+	int32_t					simple_titlecase;
+	uint8_t					numeric_value_num;
+	uint8_t					numeric_value_den;
+	uint8_t					numeric_value_exp;
+	uint8_t					age_ma, age_mi;
+	enum unicode_general_category		general_category;
+	enum unicode_block			block;
+	enum unicode_script			script;
+	enum unicode_joining_type		joining_type;
+	enum unicode_joining_group		joining_group;
+	enum unicode_east_asian_width		east_asian_width;
+	enum unicode_hangul_syllable_type	hangul_syllable_type;
+	enum unicode_numeric_type		numeric_type;
+	enum unicode_canonical_combining_class	canonical_combining_class;
+	enum unicode_bidi_class			bidi_class;
+	enum unicode_grapheme_cluster_break	grapheme_cluster_break;
+	enum unicode_sentence_break		sentence_break;
+	enum unicode_word_break			word_break;
+	enum unicode_line_break			line_break;
+};
 .ta
 .fi
 .RE
 .PP
 The members of the \fIunicode_character_data\fP structure are:
-.\" .TP
-
+.TP
+.B ucs
+The Unicode index of the character.
+.TP
+.B size
+The size of the structure, in bytes.  This can be used to determine
+the availability of a specific field if one is added in future
+versions.
+.TP
+.B fl
+A boolean combination of flags (UC_FL_), defined in ucd.h.
+.TP
+.B name
+The Unicode name of the character.
+.TP
+.B bidi_mirroring_glyph
+The Unicode string which corresponds to the mirror image of this
+character.  \fINot yet implemented.\fP
+.TP
+.B simple_uppercase
+The simple (single codepoint) uppercase mapping string for this character.  
+.TP
+.B simple_lowercase
+The simple (single codepoint) lowercase mapping string for this character.  
+.TP
+.B simple_titlecase
+The simple (single codepoint) titlecase mapping string for this character.  
+.TP
+.B numeric_value_num
+.TP
+.B numeric_value_den
+.TP
+.B numeric_value_exp
+For a number, the numeric value is given as num/den * 10^exp.
+.TP
+.B age_ma
+.TP
+.B age_mi
+Major and minor Unicode version when this character was introduced.
+If this is a vacant codepoint, this has the value 0.0.
+.PP
+All enumerations are properties defined in the Unicode standard.  Most
+Unicode properties has both a long and a short form.  The
+corresponding strings can be obtained by calling the function
+.sp
+.B int unicode_property_names_\fIproperty\fP(enum
+unicode_\fIproperty\fP \fIvalue\fP, const char **\fIlongname\fP, const char **\fIshortname\fP);
+.sp
+where the first argument is the enumeration value, and the \fIlongname\fP
+and \fIshortname\fP arguments return pointers to the respective strings.
 .SH "RETURN VALUE"
 \fBunicode_character_data()\fP, \fBunicode_character_lookup()\fP, or
 \fBunicode_character_get()\fP return an attribute structure pointer on
@@ -100,7 +169,16 @@ either EINVAL or ENOMEM.)
 .PP
 \fBunicode_database_version()\fP returns the version of the underlying
 Unicode database, in the format (major << 16)+(minor << 8)+(subminor).
+.PP
+The \fBunicode_property_names\fP functions return zero on success, or
+nonzero if the enumeration value was out of range.
 .SH "BUGS"
-The fields related to non-trivial case mappings are not yet populated.
-
+The fields related to bidirectional mirroring and non-simple case
+mappings are not yet populated.
+.PP
+There is no interface to the Unihan database.  This perhaps should be
+a separate library.
+.SH "SEE ALSO"
+The Unicode Standard,
+.IR http://www.unicode.org/ .
 
