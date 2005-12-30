@@ -47,6 +47,7 @@ unicode_character_lookup(const char *name)
 
   if ( !ucd->name || strcmp(name, ucd->name) ) {
     unicode_character_put(ucd);
+    errno = EINVAL;
     return NULL;
   }
   
