@@ -45,6 +45,9 @@ unicode_character_lookup(const char *name)
   const struct unicode_character_data *ucd =
     unicode_character_data(ucs);
 
+  if ( !ucd )
+    return NULL;
+
   if ( !ucd->name || strcmp(name, ucd->name) ) {
     unicode_character_put(ucd);
     errno = EINVAL;
