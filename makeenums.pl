@@ -68,6 +68,8 @@ while( defined($line = <LIST>) ) {
 	open(FRAG, '>', "enums/${longname}.c") or die;
 	print FRAG "#include \"libucd_int.h\"\n";
 	print FRAG "static const struct libucd_enum_names enum_names[] = {\n";
+	
+	$seqpos = 0;
     } elsif ( $line =~ /\;/ ) {
 	$line =~ s/\s*\#.*$//;	# Remove comments
 	@list = split(/\s*;\s*/, $line);
@@ -83,16 +85,23 @@ while( defined($line = <LIST>) ) {
 
 	# Write ucd.h
 
+	# $na is the preferred name, $nx the alternate
 	($na = $list[$whichname]) =~ tr/-/_/;
-	$nx = $list[1-$whichname];
-	$nx = ($nx eq 'n/a') ? '' : "/* $nx */";
+	($nx = $list[1-$whichname]) =~ tr/-/_/;
 
-	if ( defined($epos) ) {
-	    printf UCD_H "  %-30s = %3d,    %s\n", 
-	    "UC_\U${shortname}\E_${na}", $epos, $nx;
-	} else {
-	    printf UCD_H "  %-40s %s\n", 
-	    "UC_\U${shortname}\E_${na},", $nx;
+	# If the Unicode Consortium defines a numeric value,
+	# use that, otherwise use the sequential order in enum.list.
+	# For that reason, enum.list should be maintained manually
+	# and entries may only be added to the end of lists.
+
+	$epos = defined($epos) ? $epos : $seqpos;
+	$seqpos++;
+
+	printf UCD_H "  %s = %d,\n", 
+	"UC_\U${shortname}\E_${na}", $epos;
+	if ($nx ne 'n/a' && $nx ne $na && $nx) {
+	    printf UCD_H "  %s = %d,\n", 
+	    "UC_\U${shortname}\E_${nx}", $epos;
 	}
 	
 	# Write generator fragment
