@@ -176,6 +176,15 @@ blk; n/a       ; Vertical_Forms
 blk; n/a       ; Yi_Radicals
 blk; n/a       ; Yi_Syllables
 blk; n/a       ; Yijing_Hexagram_Symbols
+blk; n/a       ; Balinese
+blk; n/a       ; Counting_Rod_Numerals
+blk; n/a       ; Cuneiform
+blk; n/a       ; Cuneiform_Numbers_and_Punctuation
+blk; n/a       ; Latin_Extended-C
+blk; n/a       ; Latin_Extended-D
+blk; n/a       ; NKo
+blk; n/a       ; Phags-pa
+blk; n/a       ; Phoenician
 
 # Canonical_Combining_Class (ccc) short
 
@@ -461,6 +470,11 @@ sc ; Tibt      ; Tibetan
 sc ; Ugar      ; Ugaritic
 sc ; Xpeo      ; Old_Persian
 sc ; Yiii      ; Yi
+sc ; Bali      ; Balinese
+sc ; Nkoo      ; Nko
+sc ; Phag      ; Phags_Pa
+sc ; Phnx      ; Phoenician
+sc ; Xsux      ; Cuneiform
 
 # Sentence_Break (SB) long
 
