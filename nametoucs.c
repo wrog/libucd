@@ -2,6 +2,8 @@
 #include <string.h>
 #include <stdlib.h>
 #include <inttypes.h>
+#include <errno.h>
+
 #include "libucd_int.h"
 #include "gen/nametoucs_hash.h"
 
