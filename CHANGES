@@ -1,0 +1,7 @@
+Changes in version 0.2-5.0.0:
+
+- Updated UCD to version 5.0.0 from the Unicode Consortium.
+- Added appropriate new enumeration.
+- Fixed a few minor compilation bugs.
+- Include the UCD version number in the library number.
+
