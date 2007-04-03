@@ -30,7 +30,9 @@ static void unlock_cache(struct cache_row *r)
 
 #if defined(HAVE_PTHREAD_H) && (defined(__i386__) || defined(__x86_64__))
 
-/* Specially optimized versions for i386 and x86-64 */
+/* Specially optimized versions for i386 and x86-64 -- similar
+   things can be done for any architecture which has atomic
+   increment and decrement-with-test. */
 
 const struct unicode_character_data *
 unicode_character_get(const struct unicode_character_data *ucd)
@@ -91,7 +93,7 @@ unicode_character_put(const struct unicode_character_data *ucd)
   cnt = --pvt->usage_ctr;
   unlock(pvt);
   if ( !cnt )
-    free(ucd);
+    free((void *)ucd);
 }
 
 #endif
