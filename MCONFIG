@@ -1,5 +1,6 @@
 CC	     = cc
-CFLAGS	     = -g -O3 -I. -W -Wall -DHAVE_PTHREAD_H
+# MOO is single-threaded, so don't burden us with locking
+CFLAGS	     = -g -O3 -I. -W -Wall -UHAVE_PTHREAD_H
 PICFLAGS     = -fPIC
 LDFLAGS      = -lpthread
 AR           = ar
