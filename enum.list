@@ -30,6 +30,7 @@ bc ; WS        ; White_Space
 
 # Block (blk) long
 
+blk; n/a       ; No_Block
 blk; n/a       ; Aegean_Numbers
 blk; n/a       ; Alphabetic_Presentation_Forms
 blk; n/a       ; Ancient_Greek_Musical_Notation
@@ -131,7 +132,6 @@ blk; n/a       ; Mongolian
 blk; n/a       ; Musical_Symbols
 blk; n/a       ; Myanmar
 blk; n/a       ; New_Tai_Lue
-blk; n/a       ; No_Block
 blk; n/a       ; Number_Forms
 blk; n/a       ; Ogham
 blk; n/a       ; Old_Italic
