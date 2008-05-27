@@ -540,9 +540,9 @@ read_separated_file('ucd/Scripts.txt', ['cScript'], ['Common']);
 read_separated_file('ucd/SpecialCasing.txt', ['sUppercase_Mapping', 'sLowercase_Mapping',
 					  'sTitlecase_Mapping', 'mSpecial_Case_Condition'], []);
 read_separated_file('ucd/Jamo.txt', ['mJamo_Short_Name'], []);
-read_separated_file('ucd/auxilliary/GraphemeBreakProperty.txt', ['eGrapheme_Cluster_Break'], []);
-read_separated_file('ucd/auxilliary/SentenceBreakProperty.txt', ['eSentence_Break'], []);
-read_separated_file('ucd/auxilliary/WordBreakProperty.txt', ['eWord_Break'], []);
+read_separated_file('ucd/auxiliary/GraphemeBreakProperty.txt', ['eGrapheme_Cluster_Break'], []);
+read_separated_file('ucd/auxiliary/SentenceBreakProperty.txt', ['eSentence_Break'], []);
+read_separated_file('ucd/auxiliary/WordBreakProperty.txt', ['eWord_Break'], []);
 read_boolean_file('ucd/DerivedCoreProperties.txt');
 read_boolean_file('ucd/PropList.txt');
 

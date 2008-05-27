@@ -185,6 +185,23 @@ blk; n/a       ; Latin_Extended-D
 blk; n/a       ; NKo
 blk; n/a       ; Phags-pa
 blk; n/a       ; Phoenician
+blk; n/a       ; Ancient_Symbols
+blk; n/a       ; Carian
+blk; n/a       ; Cham
+blk; n/a       ; Cyrillic_Extended_A
+blk; n/a       ; Cyrillic_Extended_B
+blk; n/a       ; Domino_Tiles
+blk; n/a       ; Kayah_Li
+blk; n/a       ; Lepcha
+blk; n/a       ; Lycian
+blk; n/a       ; Lydian
+blk; n/a       ; Mahjong_Tiles
+blk; n/a       ; Ol_Chiki
+blk; n/a       ; Phaistos_Disc
+blk; n/a       ; Rejang
+blk; n/a       ; Saurashtra
+blk; n/a       ; Sundanese
+blk; n/a       ; Vai
 
 # Canonical_Combining_Class (ccc) short
 
@@ -283,6 +300,8 @@ GCB; LV        ; LV
 GCB; LVT       ; LVT
 GCB; T         ; T
 GCB; V         ; V
+GCB; PP        ; Prepend
+GCB; SM        ; SpacingMark
 
 # Hangul_Syllable_Type (hst) short
 
@@ -349,6 +368,7 @@ jg ; n/a       ; Yudh
 jg ; n/a       ; Yudh_He
 jg ; n/a       ; Zain
 jg ; n/a       ; Zhain
+jg ; n/a       ; Burushaski_Yeh_Barree
 
 # Joining_Type (jt) short
 
@@ -475,6 +495,17 @@ sc ; Nkoo      ; Nko
 sc ; Phag      ; Phags_Pa
 sc ; Phnx      ; Phoenician
 sc ; Xsux      ; Cuneiform
+sc ; Cari      ; Carian
+sc ; Cham      ; Cham
+sc ; Lepc      ; Lepcha
+sc ; Kali      ; Kayah_Li
+sc ; Lyci      ; Lycian
+sc ; Lydi      ; Lydian
+sc ; Olck      ; Ol_Chiki
+sc ; Rjng      ; Rejang
+sc ; Saur      ; Saurashtra
+sc ; Sund      ; Sundanese
+sc ; Vaii      ; Vai
 
 # Sentence_Break (SB) long
 
@@ -489,6 +520,10 @@ SB ; SE        ; Sep
 SB ; SP        ; Sp
 SB ; ST        ; STerm
 SB ; UP        ; Upper
+SB ; CR        ; CR
+SB ; EX        ; Extend
+SB ; LF        ; LF
+SB ; SC        ; SContinue
 
 # Word_Break (WB) long
 
@@ -500,3 +535,8 @@ WB ; LE        ; ALetter
 WB ; ML        ; MidLetter
 WB ; MN        ; MidNum
 WB ; NU        ; Numeric
+WB ; CR        ; CR
+WB ; Extend    ; Extend
+WB ; LF        ; LF
+WB ; MB        ; MidNumLet
+WB ; NL        ; Newline

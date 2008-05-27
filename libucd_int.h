@@ -34,7 +34,7 @@ struct _libucd_property_array {
   uint8_t  canonical_combining_class;
   unsigned sentence_break	:4;
   unsigned grapheme_cluster_break :4;
-  unsigned word_break		:3;
+  unsigned word_break		:4;
   unsigned joining_type  	:3;
   unsigned joining_group 	:6;
   unsigned east_asian_width     :3;
@@ -42,7 +42,6 @@ struct _libucd_property_array {
   unsigned line_break           :6;
   unsigned numeric_type         :2;
   unsigned bidi_class           :5;
-  unsigned /* unused */         :1;
 } ALIGNED(32);
 extern const struct _libucd_property_array _libucd_property_array[];
 extern const int _libucd_property_array_count;
