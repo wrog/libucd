@@ -27,7 +27,7 @@
 .TH LIBUCD 3 2005-12-29 libucd ""
 .SH NAME
 unicode_character_data, unicode_character_lookup, unicode_character_get,
-unicode_character_put, unicode_database_version \-
+unicode_character_put, unicode_database_version, unicode_library_version \-
 query the Unicode Character Database
 .SH SYNOPSIS
 .nf
@@ -42,6 +42,8 @@ query the Unicode Character Database
 .B void unicode_character_put(const struct unicode_character_data *);
 .sp
 .B uint32_t unicode_database_version();
+.sp
+.B uint32_t unicode_library_version();
 .fi
 .SH DESCRIPTION
 These functions query the Unicode Character Database for attribute
@@ -66,10 +68,6 @@ be a pointer to the original structure.
 .PP
 \fBunicode_character_put()\fP unreferences an attribute structure and
 frees it if appropriate.
-.PP
-\fBunicode_character_version()\fP returns the version of the Unicode
-database from which the library was generated, in the format
-(major << 16)+(minor << 8)+(subminor).
 .PP
 The \fIunicode_character_data\fP structure is defined in <ucd.h> and
 contains at least the following fields:
@@ -167,11 +165,14 @@ success, or NULL on failure.  In the case of failure, \fIerrno\fP is
 set to the appropriate error value (in the current implementation,
 either EINVAL or ENOMEM.)
 .PP
+The \fBunicode_property_names\fP functions return zero on success, or
+nonzero if the enumeration value was out of range.
+.PP
 \fBunicode_database_version()\fP returns the version of the underlying
 Unicode database, in the format (major << 16)+(minor << 8)+(subminor).
 .PP
-The \fBunicode_property_names\fP functions return zero on success, or
-nonzero if the enumeration value was out of range.
+\fBunicode_library_version()\fP returns the version of this library,
+in the format (major << 16)+(minor << 8)+(subminor).
 .SH "BUGS"
 The fields related to bidirectional mirroring and non-simple case
 mappings are not yet populated.
@@ -181,4 +182,3 @@ a separate library.
 .SH "SEE ALSO"
 The Unicode Standard,
 .IR http://www.unicode.org/ .
-
